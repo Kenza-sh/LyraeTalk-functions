@@ -10,3 +10,9 @@ openai
 requests
 dateparser
 babel
+azure-storage-blob
+langchain
+langchain-community
+python-docx
+faiss-cpu
+
