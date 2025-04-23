@@ -78,7 +78,7 @@ class InformationExtractor:
         entities= self.reconstruct_entities(entities)
         logger.info(entities)
         for ent in entities:
-            if ent['entity'] in {"LOC", "PER"}:
+            if ent['entity'] in {"I-LOC", "I-PER"}:
                 adr += ent['word'] + ' '
         adr = adr.strip()
         if adr:
