@@ -162,7 +162,7 @@ class CreneauExtractor:
         
     def get_creneau(self, choix_patient):
         """Analyse le texte pour extraire une date et une heure."""
-        .info(f"Traitement de l'entrée: {choix_patient}")
+        logger.info(f"Traitement de l'entrée: {choix_patient}")
         choix_patient = choix_patient.lower()
         choix_patient=self.convert_french_numbers_to_digits(choix_patient)
         choix_patient = re.sub(r'[^\w\s]', ' ', choix_patient)
@@ -172,8 +172,6 @@ class CreneauExtractor:
         logger.info(entities)
         entities= self.reconstruct_entities(entities)
         creneau_parts = [str(ent['word']) for ent in entities if ent['entity'] in ("I-DATE", "I-TIME")]
-
-
         if not creneau_parts:
             logger.warning('Aucune entité DATE ou TIME détectée.')
             return None
@@ -182,7 +180,6 @@ class CreneauExtractor:
         creneau_choisi = ' '.join(creneau_parts)
         if 'prochain' in creneau_choisi or 'prochaine' in creneau_choisi:
             creneau_choisi = creneau_choisi.replace('prochain', '').replace('prochaine', '')
-
         date_obj = dateparser.parse(creneau_choisi, languages=['fr'])
         if date_obj:
             now = datetime.now()
