@@ -168,7 +168,7 @@ class CreneauExtractor:
         choix_patient = re.sub(r'[^\w\s]', ' ', choix_patient)
         choix_patient = re.sub(r'\s+', ' ', choix_patient)
         choix_patient =self.update_choix_patient(choix_patient)
-        entities = self.get_entities(texte)
+        entities = self.get_entities(choix_patient)
         logger.info(entities)
         entities= self.reconstruct_entities(entities)
         creneau_parts = [str(ent['word']) for ent in entities if ent['entity'] in ("I-DATE", "I-TIME")]
