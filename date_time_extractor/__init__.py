@@ -2,24 +2,19 @@ import re
 import logging
 import dateparser
 from datetime import datetime, timedelta
-from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 from babel.dates import format_date
 import calendar
 import azure.functions as func
 import json
+import urllib.request
+import os
+from typing import List, Dict
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class CreneauExtractor:
     def __init__(self):
-        # Initialisation du modèle NLP
-        self.tokenizer = AutoTokenizer.from_pretrained("Jean-Baptiste/camembert-ner-with-dates")
-        self.model = AutoModelForTokenClassification.from_pretrained("Jean-Baptiste/camembert-ner-with-dates")
-        self.nlp = pipeline('ner', model=self.model, tokenizer=self.tokenizer, aggregation_strategy="simple")
-        
-        # Configuration du logger
-        self.logger = logging.getLogger(__name__)
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-        # Dictionnaire de correspondance des nombres en français
         self.french_number_mapping = { "premier": "1", "un": "1", "deux": "2", "trois": "3", "quatre": "4", "cinq": "5",
             "six": "6", "sept": "7", "huit": "8", "neuf": "9", "dix": "10", "onze": "11", "douze": "12", "treize": "13", "quatorze": "14",
             "quinze": "15", "seize": "16", "dix-sept": "17", "dix-huit": "18", "dix-neuf": "19", "vingt": "20", "vingt-et-un": "21",
@@ -31,11 +26,7 @@ class CreneauExtractor:
             'seize heures': '16h', 'dix-sept heures': '17h', 'dix-huit heures': '18h',
             'dix-neuf heures': '19h', 'vingt heures': '20h', 'vingt et une heures': '21h',
             'vingt-deux heures': '22h', 'vingt-trois heures': '23h',}
-        
-        # Correspondance des jours de la semaine
         self.weekdays_mapping = {"lundi": 0, "mardi": 1, "mercredi": 2, "jeudi": 3, "vendredi": 4, "samedi": 5, "dimanche": 6}
-
-        # Correspondance des dates relatives
         self.relative_dates = {"aujourd'hui": 0,"après-demain": 2,"après demain": 2 ,"apres demain": 2,"demain": 1,  "dans deux jours": 2, "dans trois jours": 3,
             "dans une semaine": 7, "dans deux semaines": 14, "dans trois semaines": 21, "dans un mois": 30, "dans deux mois": 60, "dans trois mois": 90,
             "dans six mois": 180, "dans un an": 365, "dans deux ans": 730, "dans trois ans": 1095,'semaine prochaine':7,'fin du mois' :'30',"mois prochain": 30,
@@ -104,7 +95,72 @@ class CreneauExtractor:
                 choix_patient = choix_patient.replace(f"{jour} prochain", f"le {formatted_date}")
         return choix_patient
 
-
+    def get_entities(self , texte):
+        data = {"inputs": texte}
+        body = str.encode(json.dumps(data))
+        url = os.environ["HG_MODEL_ENDPOINT"]
+        api_key = os.environ["HG_MODEL_ENDPOINT_KEY"]
+        if not api_key:
+            raise Exception("A key should be provided to invoke the endpoint")
+        headers = {'Content-Type':'application/json', 'Accept': 'application/json', 'Authorization':('Bearer '+ api_key)}
+        req = urllib.request.Request(url, body, headers)
+        try:
+            response = urllib.request.urlopen(req)
+            result = response.read()
+            decoded_str = result.decode('utf-8')
+            ner_list = json.loads(decoded_str)
+            logger.info(result)
+            logger.info(ner_list)
+            return ner_list
+        except urllib.error.HTTPError as error:
+            print("The request failed with status code: " + str(error.code))
+            print(error.info())
+            print(error.read().decode("utf8", 'ignore'))
+            return []
+    def reconstruct_entities(self, ner_output):
+        entities = []
+        current_entity = {
+            "entity": None,
+            "score": [],
+            "start": None,
+            "end": None,
+            "word": ""
+        }
+    
+        for token in ner_output:
+            if current_entity["entity"] != token["entity"]:
+                if current_entity["entity"]:
+                    entities.append({
+                        "entity": current_entity["entity"],
+                        "score": sum(current_entity["score"]) / len(current_entity["score"]),
+                        "word": current_entity["word"].replace("▁", " ").strip(),
+                        "start": current_entity["start"],
+                        "end": current_entity["end"]
+                    })
+                # Start new entity
+                current_entity = {
+                    "entity": token["entity"],
+                    "score": [token["score"]],
+                    "start": token["start"],
+                    "end": token["end"],
+                    "word": token["word"]
+                }
+            else:
+                current_entity["score"].append(token["score"])
+                current_entity["end"] = token["end"]
+                current_entity["word"] += token["word"]
+    
+        # Add last entity
+        if current_entity["entity"]:
+            entities.append({
+                "entity": current_entity["entity"],
+                "score": sum(current_entity["score"]) / len(current_entity["score"]),
+                "word": current_entity["word"].replace("▁", " ").strip(),
+                "start": current_entity["start"],
+                "end": current_entity["end"]
+            })
+        return entities
+        
     def get_creneau(self, choix_patient):
         """Analyse le texte pour extraire une date et une heure."""
         self.logger.info(f"Traitement de l'entrée: {choix_patient}")
@@ -113,8 +169,10 @@ class CreneauExtractor:
         choix_patient = re.sub(r'[^\w\s]', ' ', choix_patient)
         choix_patient = re.sub(r'\s+', ' ', choix_patient)
         choix_patient =self.update_choix_patient(choix_patient)
-        entities = self.nlp(choix_patient)
-        creneau_parts = [str(ent['word']) for ent in entities if ent['entity_group'] in ("DATE", "TIME")]
+        entities = self.get_entities(texte)
+        logger.info(entities)
+        entities= self.reconstruct_entities(entities)
+        creneau_parts = [str(ent['word']) for ent in entities if ent['entity'] in ("I-DATE", "I-TIME")]
 
 
         if not creneau_parts:
@@ -139,6 +197,7 @@ class CreneauExtractor:
             return None
             
 extractor=CreneauExtractor()
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
