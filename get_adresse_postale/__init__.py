@@ -46,14 +46,13 @@ extractor = InformationExtractor(nlp)
 class InformationExtractor:
     def __init__(self):
         logger.info("Modèle NER initialisé avec succès.")    
-    def get_entities(self,texte):
-        data = {"inputs":texte}
+    def get_entities(self , texte):
+        data = {"inputs": texte}
         body = str.encode(json.dumps(data))
         url = os.environ["HG_MODEL_ENDPOINT"]
         api_key = os.environ["HG_MODEL_ENDPOINT_KEY"]
         if not api_key:
             raise Exception("A key should be provided to invoke the endpoint")
-        
         headers = {'Content-Type':'application/json', 'Accept': 'application/json', 'Authorization':('Bearer '+ api_key)}
         req = urllib.request.Request(url, body, headers)
         try:
@@ -61,8 +60,8 @@ class InformationExtractor:
             result = response.read()
             decoded_str = result.decode('utf-8')
             ner_list = json.loads(decoded_str)
-            print(result)
-            print(ner_list)
+            logger.info(result)
+            logger.info(ner_list)
             return ner_list
         except urllib.error.HTTPError as error:
             print("The request failed with status code: " + str(error.code))
@@ -71,12 +70,13 @@ class InformationExtractor:
             return []
     def extraire_adresse(self, texte):
         logger.info(f"Extraction de l'adresse à partir du texte : {texte}")
-        # Extraction du numéro de rue
         numero_rue = re.search(r'\b\d+\b', texte)
         adr = f"{numero_rue.group()} " if numero_rue else ""
         # Extraction des entités pertinentes
         entities = self.get_entities(texte)
+        logger.info(entities)
         entities= self.reconstruct_entities(entities)
+        logger.info(entities)
         for ent in entities:
             if ent['entity_group'] in {"LOC", "PER"}:
                 adr += ent['word'] + ' '
@@ -86,7 +86,8 @@ class InformationExtractor:
         else:
             logger.warning("Aucune adresse n'a été extraite.")
         return adr
-    def reconstruct_entities(self,ner_output):
+        
+    def reconstruct_entities(self, ner_output):
         entities = []
         current_entity = {
             "entity": None,
