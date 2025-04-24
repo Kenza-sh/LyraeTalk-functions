@@ -1,7 +1,6 @@
 import azure.functions as func
 import logging
 from langchain.document_loaders import PyPDFLoader, DirectoryLoader, TextLoader, JSONLoader
-from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.embeddings import AzureOpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
@@ -16,10 +15,6 @@ import tempfile
 import pickle
 from azure.storage.blob import BlobServiceClient
 from openai import AzureOpenAI
-import azure.functions as func
-import logging
-import os
-import json
 
 os.environ['FAISS_NO_GPU'] = '1'
 
@@ -172,6 +167,7 @@ class RAG_Azure:
         return self.answer_query(query, context)
 
 rag_system = RAG_Azure()
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
