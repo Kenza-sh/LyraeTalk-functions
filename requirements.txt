@@ -1,11 +1,4 @@
-azure-functions==1.21.3
-scikit-learn
-transformers
-numpy==1.24.1
- --find-links https://download.pytorch.org/whl/torch_stable.html
- torch==2.3.0+cpu 
-tiktoken
-sentencepiece
+azure-functions
 openai
 requests
 dateparser
