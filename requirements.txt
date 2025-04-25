@@ -1,5 +1,6 @@
 azure-functions
 openai
+tiktoken
 requests
 dateparser
 babel
