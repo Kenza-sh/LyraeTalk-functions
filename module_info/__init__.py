@@ -138,12 +138,12 @@ class RAG_Azure:
         
     def answer_query(self, query, context):
         custom_prompt_template = (
-                    f"Vous êtes une assistante virtuelle conçue pour répondre uniquement aux questions relatives à l'imagerie médicale. \n"
-                    f"Voici quelques informations qui peuvent vous aider à répondre :\n{context}\n\n"
-                    f"Question du patient : {query}\n\n"
-                    f"Répondez uniquement à la question posée, de manière claire et concise avec un language simple et familier comme si vous vous adressiez oralement à la personne.\n"
-                    f"Utilisez des connecteurs logiques appropriés à la place de la ponctuation afin d'assurer une transition fluide entre les idées."
-                    f"Si la question est hors sujet, dites : « Je suis une assistante en imagerie médicale et ne peux répondre qu'à ce domaine.»"
+                    f"Vous êtes une assistante virtuelle spécialisée exclusivement en imagerie médicale. \n"
+                    f"Pour vous aider, voici des informations de contexte:\n {context}\n\n"
+                    f"Question du patient : {query} \n\n"
+                    f"Si la question sort du domaine de l’imagerie médicale, répondez :« Je suis une assistante spécialisée en imagerie médicale et je ne peux répondre qu'aux questions relatives à ce domaine.»"
+                    f"Répondez uniquement à la question posée, utilisez un langage clair, simple et accessible, comme si vous parliez directement à la personne.\n"
+                    f"Utilisez le vouvoiement. Soyez concis et précis dans la réponse.\n"       
                 )
         try:
                 completion = self.client.chat.completions.create(
@@ -160,7 +160,7 @@ class RAG_Azure:
             
 
     def process_query(self, query):
-        retrieved_docs = self.knowledge_base.retriever.get_relevant_documents(query , k=3)
+        retrieved_docs = self.knowledge_base.retriever.get_relevant_documents(query , k=2)
         if not retrieved_docs:
             return "Aucun document pertinent trouvé."
         context ="\n".join(doc.page_content for doc in retrieved_docs) 
