@@ -58,15 +58,16 @@ Ta tâche est de déterminer si cette phrase est :
 
 - ou une "question précise" : question spécifique avec un sujet, un détail ou une demande claire.
   Exemples :
-    - "Quels sont vos horaires d'ouverture ?"
-    - "Combien coûte un examen de radiologie "
-    - "À quelle heure êtes-vous disponibles pour un rendez-vous ?"
+    - "Je voudrais savoir le cout d'une cosultation"
+    - "Je veux savoir les horaires d'ouverture de votre cabinet ?"
+    - "Pouvez vous me dire les tarifs des examen d'echo"
+    - "je veux obtenir des infos sur les différents sites du centre de radiologie"
 Phrase : {sentence}
 Réponds uniquement par "globale" ou "précise", sans ajouter aucun autre texte.
 """
     response = client.chat.completions.create(
         model="gpt-35-turbo",
-        temperature=0,
+        temperature=0.5,
         messages=[
             {"role": "user", "content": prompt}
         ]
