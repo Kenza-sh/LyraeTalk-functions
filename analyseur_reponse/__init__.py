@@ -36,8 +36,9 @@ class AnalyseurConversation:
                 "Je ne valide pas", "Ça ne me branche pas", "Je dis stop", "Pas envisageable", 
                 "Je ne cautionne pas", "Je bloque là-dessus", "Je ne suis pas en phase", "je n'accepte pas"
                 "Ça ne me convient pas", "Je ne signe pas", "Je recule", "Pas moyen", "C'est exclu",
-                "Je ne suis pas ok", "Je ne donne pas mon accord", "Je ferme la porte à ça","no","impossible","nope",'non','refus'
-            ],
+                "Je ne suis pas ok", "Je ne donne pas mon accord", "Je ferme la porte à ça","no","impossible","nope",'non','refus',
+                "ce n'est pas ça","ce n'est pas cela","c'est pas ça","c'est pas cela","non c'est pas ça","non c'est pas cela","pas ça",
+                "pas cela","non ce n'est pas ça","non ce n'est pas cela"],
             "indéterminée": [
                 "Oui mais " , "Je ne suis pas sûr.", "Je ne sais pas.", "Peut-être, je ne sais pas vraiment.",
                 "Je ne suis pas convaincu.", "C'est compliqué.", "Je doute.", "Ça m'embête.",
@@ -65,7 +66,8 @@ class AnalyseurConversation:
                 "Je suis ravi de participer", "C'est validé de mon côté", "Je signe des deux mains", "Je marche à 100%", "C'est entendu",
                 "Aucune objection", "Je plussoie", "C'est nickel", "Je valide à 200%","C'est bien ca","pas de problème",
                 'sans hésitation','sans souci', 'sans problème',"sans aucun souci","sans aucun problème",'nickel','top',"je valide",
-                "Je m'y attelle avec joie", "C'est top", "Je m'implique totalement", "Je ne peux qu'approuver", "C'est du tout bon","oui",'ok',"j'accepte"
+                "Je m'y attelle avec joie", "C'est top", "Je m'implique totalement", "Je ne peux qu'approuver", "C'est du tout bon","oui",'ok',"j'accepte",
+                "C'est ça", "C'est cela",
             ],
             
         }
