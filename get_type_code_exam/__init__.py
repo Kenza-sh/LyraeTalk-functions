@@ -44,6 +44,10 @@ class ExamenFetcher:
                 r'cone[- ]?beam': "CONE BEAM (RADIOGRAPHIE DES DENTS)",
                 r'tomographie': "TOMOGRAPHIE (RADIOGRAPHIE DES DENTS)",
                 r'doppler': "DOPPLER (ÉCHOGRAPHIE DES VAISSEAUX)",
+                r'eco': "échographie",
+                r'radio': "radiographie",
+                r'mamo': "mammographie",
+                r'ct' :"scanner",
                 r'echodoppler': "ECHODOPPLER (ÉCHOGRAPHIE DOPPLER)",
                 r'echocardiographie': "ECHOCARDIOGRAPHIE (ÉCHOGRAPHIE DU CŒUR)",
                 r'cerebro[- ]?scanner': "CEREBROSCANNER (SCANNER DU CERVEAU)",
@@ -58,16 +62,18 @@ class ExamenFetcher:
             "MAMMOGRAPHIE": ["mammographie", "mammogramme", "mammo", "mamographie", "sein", "mammaire"],
             'IMAGERIE':['imagerie']
         }
-
+    def process_text(self , texte):
+        titre_normalise = texte.lower()
+        for pattern, replacement in self.replacements.items():
+            titre_normalise = re.sub(pattern, replacement, titre_normalise, flags=re.IGNORECASE)
+        return titre_normalise
+                
     def get_type_examen(self , texte):
         if not texte or not texte.strip():
             logging.warning("Texte vide ou invalide fourni à get_type_examen")
             return "AUTRE"
-        titre_normalise = texte.lower()
-        for pattern, replacement in self.replacements.items():
-            titre_normalise = re.sub(pattern, replacement, titre_normalise, flags=re.IGNORECASE)
         for category, words in self.keywords.items():
-            if any(word in titre_normalise for word in words):
+            if any(word in texte for word in words):
                 logging.info(f"Type d'examen identifié: {category}")
                 return category
         logging.info("Aucun type d'examen trouvé, retour par défaut: AUTRE")
@@ -126,6 +132,7 @@ class ExamenFetcher:
           "MAMMOGRAPHIE": "MG",
           'AUTRE' :None
       }
+      texte=self.process_text(texte)
       type_exam = self.get_type_examen(texte)
       id = exam_types.get(type_exam)
       if not id:
@@ -155,7 +162,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 mimetype="application/json",
                 status_code=400
             )
-
         type_examen ,type_examen_id, code_examen , code_examen_id = fetcher.lyae_talk_exam(query)
         return func.HttpResponse(
             json.dumps({"type_examen": type_examen , "type_examen_id":type_examen_id , "code_examen":code_examen , "code_examen_id": code_examen_id}),
