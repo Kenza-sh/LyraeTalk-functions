@@ -16,13 +16,19 @@ categories = [
     "prise de rendez-vous",
     "modification de rendez-vous",
     "annulation de rendez-vous",
-    "consultation de rendez-vous"
+    "consultation de rendez-vous",
+    "Autre",
 ]
 
 def answer_query(text):
-        custom_prompt_template = (f"""Voici une liste de catégories : {', '.join(categories)}.
-                Classifiez la phrase suivante dans l'une de ces catégories : {text}
-                Répondez uniquement par la catégorie la plus appropriée.""")
+        custom_prompt_template = (f"""Vous êtes un assistant pour un centre de radiologie.
+Voici la liste des catégories possibles : {', '.join(categories)}.
+Votre tâche :
+- Analysez la phrase suivante : "{text}"
+- Classez-la dans la catégorie la plus appropriée de la liste.
+- Si la phrase n'est pas liée à la radiologie médicale, répondez uniquement : "Autre".
+- Répondez uniquement par le nom de la catégorie, sans ajouter d'explication.
+""")
         try:
                 completion = client.chat.completions.create(
                     model=llm_model,
