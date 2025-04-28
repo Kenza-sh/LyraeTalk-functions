@@ -90,8 +90,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 mimetype="application/json",
                 status_code=400
             )
-                  
-        result = contains_question_word(query) 
+        if contains_question_word(query) :
+            result = True
+        else :
+              result = classify_sentence(query)
               
         return func.HttpResponse(
             json.dumps({"response": result}),
