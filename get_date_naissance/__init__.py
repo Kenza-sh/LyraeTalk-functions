@@ -84,17 +84,15 @@ class InformationExtractor:
     
         return entities
     
-    def replace_numbers_in_string(self , sentence):
-        number_map = { "premier": 1,"un": 1,"1er":1}
+    def replace_numbers_in_string(self, sentence):
+        number_map = {"premier": 1, "un": 1, "1er": 1, "deuxième": 2, "deux": 2, "2e": 2}
         for word, num in number_map.items():
             sentence = re.sub(r'\b' + re.escape(word) + r'\b', str(num), sentence)
         return sentence
-        
-    def is_future_date(self , birth_date):
+
+    def is_future_date(self, birth_date):
         today = datetime.today()
-        if birth_date > today:
-            return True
-        return False
+        return birth_date > today
         
     def extraire_date_naissance(self, texte):
         logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
@@ -109,9 +107,9 @@ class InformationExtractor:
                 if date_obj:
                     formatted_date = date_obj.strftime("%Y-%m-%d")
                     logger.info(f"Date de naissance extraite : {formatted_date}")
-                    if self.is_future_date(formatted_date):
-                         logger.warning(f"Date non valide extraites (Date dans le future) : {date_str}")
-                         return date_str
+                    if self.is_future_date(date_obj):
+                        logger.warning(f"Date non valide (date dans le futur) : {date_str}")
+                        return date_str
                     return formatted_date
                 else:
                     logger.warning(f"Date non valide extraites : {date_str}")
