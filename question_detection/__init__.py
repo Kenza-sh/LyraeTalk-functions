@@ -3,6 +3,8 @@ import azure.functions as func
 import logging
 import json
 import os
+import re
+from unidecode import unidecode
 
 client = AzureOpenAI(
           azure_endpoint = os.environ["AZURE_OPENAI_ENDPOINT"],
@@ -10,6 +12,38 @@ client = AzureOpenAI(
           api_version="2024-05-01-preview"
         )
 llm_model="gpt-35-turbo"
+
+QUESTION_WORDS = [
+    'comment', 'quand', 'où', 'pourquoi', 'qui', 'que', 'combien',
+    'quel', 'quelle', 'quels', 'quelles','lequel', 'laquelle', 'lesquels',
+    'lesquelles','est-ce que', 'est ce que',
+    'à quelle heure', 'à quel moment', 'à combien',
+    'en quoi', 'de quelle façon', 'de quelle manière',
+    'à quel point', 'depuis quand', 'jusqu\'à quand',
+    'à qui', 'avec qui', "à quel tarif","par où", "vers où","à quelle distance",
+  "en quoi", "à quel point","pour quelle raison", "dans quel but",
+"sous quelle condition", "dans quel contexte","jusqu'à quand",
+"depuis combien de temps","pendant combien de temps", "en quelle année",
+"où est-ce que", "quand est-ce que", "pourquoi est-ce que", "qui est-ce que",
+ 'à qui', 'avec qui', 'pour qui', 'chez qui', 'contre qui', 
+'à quoi', 'avec quoi', 'sans quoi', 'dans quoi', 
+    
+]
+
+_pattern = re.compile(
+    r'\b(?:' + '|'.join(re.escape(w) for w in QUESTION_WORDS) + r')\b',
+    flags=re.IGNORECASE
+)
+
+def normalize(text: str) -> str:
+    return unidecode(text).lower()
+
+def find_question_words(sentence: str) -> list[str]:
+    norm = normalize(sentence)
+    return _pattern.findall(norm)
+
+def contains_question_word(sentence: str) -> bool:
+    return bool(find_question_words(sentence))
 
 def classify_sentence(sentence):
     prompt = f"""Tu es un classifieur intelligent.
@@ -55,9 +89,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 mimetype="application/json",
                 status_code=400
             )
-
-        result = classify_sentence(query)
-
+                  
+        result = contains_question_word(query) 
+              
         return func.HttpResponse(
             json.dumps({"response": result}),
             mimetype="application/json"
