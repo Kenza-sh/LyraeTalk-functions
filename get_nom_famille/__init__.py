@@ -93,8 +93,16 @@ class InformationExtractor:
             logger.warning(f"Le message {msg_2_check} contient des caractères invalides.")
             return False
         return True
+    def detecter_lettres_uniques(self , phrase):
+        pattern = r'\b([a-zA-Z])\b'
+        phrase_sans_ponctuation = re.sub(r"[^\w\s]", '', phrase)
+        lettres = re.findall(pattern, phrase_sans_ponctuation)
+        return ''.join(lettres)
     def extraire_nom(self, texte):
         logger.info(f"Extraction du nom à partir du texte : {texte}")
+        nom=self.detecter_lettres_uniques(texte)
+        if nom :
+            texte = f"Mon nom de famille est {nom} "
         entities = self.get_entities(texte)
         logger.info(entities)
         entities= self.reconstruct_entities(entities)
@@ -105,6 +113,7 @@ class InformationExtractor:
                     return ent['word'].upper()
         logger.warning("Aucun nom n'a été extrait.")
         return None
+    
       
     
 extractor = InformationExtractor()
