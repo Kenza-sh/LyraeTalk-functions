@@ -9,4 +9,5 @@ langchain
 langchain-community
 python-docx
 faiss-cpu
+unidecode
 
