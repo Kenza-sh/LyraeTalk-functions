@@ -15,6 +15,7 @@ import tempfile
 import pickle
 from azure.storage.blob import BlobServiceClient
 from openai import AzureOpenAI
+from datetime import datetime
 
 os.environ['FAISS_NO_GPU'] = '1'
 
@@ -31,7 +32,7 @@ class KnowledgeBase:
         self.text_splitter = None 
         self.documents=self.convert_texts_to_documents(self.text_split(text_data)) if text_data else []
         self.retriever = None
-        
+            
     def convert_texts_to_documents(self, texts):
         return [Document(page_content=text) for text in texts]
         
@@ -72,6 +73,7 @@ class RAG_Azure:
     def __init__(self , llm_model="gpt-35-turbo"):
         self.connection_string = os.environ["AZURE_STORAGE_CONNECTION_STRING"]
         self.container_name = os.environ["AZURE_STORAGE_CONTAINER_NAME"]
+        self.container_name_historic = os.environ["AZURE_STORAGE_CONTAINER_NAME_HISTORIC"]
         self.client = AzureOpenAI(
           azure_endpoint = os.environ["AZURE_OPENAI_ENDPOINT"],
           api_key= os.environ["AZURE_OPENAI_API_KEY"],
@@ -153,12 +155,30 @@ class RAG_Azure:
                         {"role": "user", "content": query}
                     ],
                 )
-                return completion.choices[0].message.content
+                answer = completion.choices[0].message.content
+                save_interaction_to_blob(self, question, answer)
+                return answer
         except Exception as e:
             logger.error(f"Error answering query: {e}")
             return "Une erreur est survenue lors de la réponse."
             
-
+    def save_interaction_to_blob(self, question, answer):
+        try:
+            blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
+            container_client = blob_service_client.get_container_client(self.container_name_historic)
+            timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
+            blob_name = f"interactions/interaction_{timestamp}.json"
+            interaction_data = {
+                "question": question,
+                "answer": answer,
+                "timestamp": timestamp
+            }
+            json_data = json.dumps(interaction_data, ensure_ascii=False).encode("utf-8")
+            container_client.upload_blob(name=blob_name, data=json_data, overwrite=True)
+            logger.info(f"Interaction enregistrée sous {blob_name}")
+        except Exception as e:
+            logger.error(f"Erreur lors de l'enregistrement de l'interaction : {e}")         
+            
     def process_query(self, query):
         retrieved_docs = self.knowledge_base.retriever.get_relevant_documents(query , k=2)
         if not retrieved_docs:
