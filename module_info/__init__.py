@@ -156,7 +156,7 @@ class RAG_Azure:
                     ],
                 )
                 answer = completion.choices[0].message.content
-                save_interaction_to_blob(self, question, answer)
+                self.save_interaction_to_blob(query, answer)
                 return answer
         except Exception as e:
             logger.error(f"Error answering query: {e}")
