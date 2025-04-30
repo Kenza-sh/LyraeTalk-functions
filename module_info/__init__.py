@@ -161,24 +161,34 @@ class RAG_Azure:
         except Exception as e:
             logger.error(f"Error answering query: {e}")
             return "Une erreur est survenue lors de la réponse."
-            
+              
     def save_interaction_to_blob(self, question, answer):
-        try:
-            blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
-            container_client = blob_service_client.get_container_client(self.container_name_historic)
-            timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
-            blob_name = f"interactions/interaction_{timestamp}.json"
-            interaction_data = {
-                "question": question,
-                "answer": answer,
-                "timestamp": timestamp
-            }
-            json_data = json.dumps(interaction_data, ensure_ascii=False).encode("utf-8")
-            container_client.upload_blob(name=blob_name, data=json_data, overwrite=True)
-            logger.info(f"Interaction enregistrée sous {blob_name}")
-        except Exception as e:
-            logger.error(f"Erreur lors de l'enregistrement de l'interaction : {e}")         
-            
+            try:
+                blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
+                container_client = blob_service_client.get_container_client(self.container_name_historic)
+                blob_name = "interactions/all_interactions.json"
+                try:
+                    blob_client = container_client.get_blob_client(blob_name)
+                    if blob_client.exists():
+                        blob_data = blob_client.download_blob().readall()
+                        interactions = json.loads(blob_data)
+                    else:
+                        interactions = []
+                except Exception as e:
+                    logger.warning(f"Impossible de lire le blob existant, un nouveau sera créé. Erreur : {e}")
+                    interactions = []
+                from datetime import datetime
+                interactions.append({
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "question": question,
+                    "answer": answer
+                })
+                updated_data = json.dumps(interactions, ensure_ascii=False, indent=2).encode("utf-8")
+                container_client.upload_blob(name=blob_name, data=updated_data, overwrite=True)
+                logger.info(f"Interaction ajoutée dans {blob_name}")
+            except Exception as e:
+                logger.error(f"Erreur lors de l'enregistrement de l'interaction : {e}")
+        
     def process_query(self, query):
         retrieved_docs = self.knowledge_base.retriever.get_relevant_documents(query , k=2)
         if not retrieved_docs:
