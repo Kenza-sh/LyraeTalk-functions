@@ -62,12 +62,11 @@ Je te donnerai une phrase et tu devras indiquer si c’est :
      – “Pouvez-vous me dire les tarifs des examens d’écho ?”
      – “Je veux des infos sur les différents sites du centre de radiologie.”
 Phrase à classifier : {sentence}
-Réponds **uniquement** par **“globale”** ou **“précise”**, sans aucun autre texte.
+Réponds uniquement par **“globale”** ou **“précise”**, sans aucun autre texte.
 """
     response = client.chat.completions.create(
         model="gpt-35-turbo",
         temperature=0,
-        top_p = 1.0,
         messages=[
             {"role": "user", "content": prompt}
         ]
