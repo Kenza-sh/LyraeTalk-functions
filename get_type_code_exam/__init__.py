@@ -69,6 +69,8 @@ class ExamenFetcher:
             titre_normalise = re.sub(pattern, replacement, titre_normalise, flags=re.IGNORECASE)
         return titre_normalise
     def normalize_examen(self , text):
+                if not isinstance(text, str):
+                        return text
                 patterns = { r"\bMammographie\s+(Unilatérale|Dépistage|Bilatérale)\b": "Mammographie",
                     r"\bRadio\s+Poignet\b": "Radiographie du poignet",
                     r"\bRadio\s+Rachis\s+Lombaire\b": "Radiographie du rachis lombaire",
@@ -100,7 +102,6 @@ class ExamenFetcher:
             ids = self.ids_base
         else:
             ids = {id.upper() for id in ids if id.upper() in self.ids_base}
-        
         data = {}
         with requests.Session() as session:
             session.headers.update(self.headers)
@@ -160,7 +161,7 @@ class ExamenFetcher:
       if code_exam=='None':
          code_exam= None
       else :
-          code_exam = self.normalize_examen(code_exam)
+          code_exam = self.normalize_examen(str(code_exam))
       logging.info(f"Résultat final: Type {type_exam}, ID {id}, Code Examen {code_exam}, Exam Code {code_exam_id}")
       return type_exam,id, code_exam , code_exam_id
 
