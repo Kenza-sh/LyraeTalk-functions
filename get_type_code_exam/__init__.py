@@ -47,6 +47,7 @@ class ExamenFetcher:
                 r'eco': "échographie",
                 r'radio': "radiographie",
                 r'mamo': "mammographie",
+                r'mammo': "mammographie",
                 r'ct' :"scanner",
                 r'echodoppler': "ECHODOPPLER (ÉCHOGRAPHIE DOPPLER)",
                 r'echocardiographie': "ECHOCARDIOGRAPHIE (ÉCHOGRAPHIE DU CŒUR)",
@@ -67,6 +68,21 @@ class ExamenFetcher:
         for pattern, replacement in self.replacements.items():
             titre_normalise = re.sub(pattern, replacement, titre_normalise, flags=re.IGNORECASE)
         return titre_normalise
+    def normalize_examen(self , text):
+                patterns = { r"\bMammographie\s+(Unilatérale|Dépistage|Bilatérale)\b": "Mammographie",
+                    r"\bRadio\s+Poignet\b": "Radiographie du poignet",
+                    r"\bRadio\s+Rachis\s+Lombaire\b": "Radiographie du rachis lombaire",
+                    r"\bRadio\s+Genou\b": "Radiographie du genou",
+                    r"\bRadio\s+Membre\s+Inférieur\b": "Radiographie de la jambe",
+                    r"\bRadio\s+Membre\s+Supérieur\b": "Radiographie du bras",
+                    r"\bIRM\s+Cheville\b": "IRM de la cheville",
+                    r"\bIRM\s+Genou\b": "IRM du genou",
+                    r"\bIRM\s+Bras\b": "IRM du Bras",
+                    r"\bIRM\s+Bassin\b": "IRM du Bassin",  }
+                normalized = text
+                for pat, repl in patterns.items():
+                    normalized = re.sub(pat, repl, normalized, flags=re.IGNORECASE)
+                return normalized
                 
     def get_type_examen(self , texte):
         if not texte or not texte.strip():
@@ -102,7 +118,6 @@ class ExamenFetcher:
                 except requests.RequestException as e:
                     logging.info(f"Erreur lors de la requête pour {id}: {e}")
         return data
-
     def get_class(self, text, data):
         custom_prompt_template = (
             f"Voici la liste des examens médicaux proposés par notre centre d'imagerie médicale : {', '.join(data.values())}. \n"
@@ -122,7 +137,7 @@ class ExamenFetcher:
         except Exception as e:
             logging.error(f"Error answering query: {e}")
             return "Une erreur est survenue lors de la réponse."
-
+     
     def lyae_talk_exam(self, texte):
       exam_types = {
           "RADIO": "RX",
@@ -144,6 +159,7 @@ class ExamenFetcher:
       code_exam_id = next((k for k, v in actes.items() if v == code_exam), None)
       if code_exam=='None':
          code_exam= None
+      code_exam = self.normalize_examen(code_exam)
       logging.info(f"Résultat final: Type {type_exam}, ID {id}, Code Examen {code_exam}, Exam Code {code_exam_id}")
       return type_exam,id, code_exam , code_exam_id
 
