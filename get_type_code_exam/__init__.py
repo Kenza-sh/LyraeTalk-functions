@@ -159,7 +159,8 @@ class ExamenFetcher:
       code_exam_id = next((k for k, v in actes.items() if v == code_exam), None)
       if code_exam=='None':
          code_exam= None
-      code_exam = self.normalize_examen(code_exam)
+      else :
+          code_exam = self.normalize_examen(code_exam)
       logging.info(f"Résultat final: Type {type_exam}, ID {id}, Code Examen {code_exam}, Exam Code {code_exam_id}")
       return type_exam,id, code_exam , code_exam_id
 
