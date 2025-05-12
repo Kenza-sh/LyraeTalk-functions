@@ -46,28 +46,28 @@ def contains_question_word(sentence: str) -> bool:
     return bool(find_question_words(sentence))
 
 def classify_sentence(sentence):
-    prompt = f"""Tu es un classifieur intelligent.
-Je vais te donner une phrase en français.
-Ta tâche est de déterminer si cette phrase est :
-- une "question globale" : question vague, générale, générique, sans détail spécifique.
-  Exemples : 
-    - "Puis-je avoir des informations ?"
-    - "Je voudrais me renseigner."
-    - "Pouvez-vous me donner des renseignements ?"
-    - "je veux obtenir des infos"
-
-- ou une "question précise" : question spécifique avec un sujet, un détail ou une demande claire.
-  Exemples :
-    - "Je voudrais savoir le cout d'une cosultation"
-    - "Je veux savoir les horaires d'ouverture de votre cabinet ?"
-    - "Pouvez vous me dire les tarifs des examen d'echo"
-    - "je veux obtenir des infos sur les différents sites du centre de radiologie"
-Phrase : {sentence}
-Réponds uniquement par "globale" ou "précise", sans ajouter aucun autre texte.
+    prompt = f"""
+Tu es un classifieur de questions.
+Je te donnerai une phrase et tu devras indiquer si c’est :
+1. une question globale : formulation vague ou générale, sans éléments spécifiques.
+   Exemples :
+     – “Puis-je avoir des informations ?”
+     – “Je voudrais me renseigner.”
+     – “Pouvez-vous me donner des renseignements ?”
+     – “Je veux obtenir des infos.”
+2. une question précise : demande claire avec un sujet ou un détail spécifique.
+   Exemples :
+     – “Je voudrais connaître le coût d’une consultation.”
+     – “Quelles sont les horaires d’ouverture de votre cabinet ?”
+     – “Pouvez-vous me dire les tarifs des examens d’écho ?”
+     – “Je veux des infos sur les différents sites du centre de radiologie.”
+Phrase à classifier : {sentence}
+Réponds **uniquement** par **“globale”** ou **“précise”**, sans aucun autre texte.
 """
     response = client.chat.completions.create(
         model="gpt-35-turbo",
-        temperature=0.5,
+        temperature=0,
+        top_p = 1.0
         messages=[
             {"role": "user", "content": prompt}
         ]
