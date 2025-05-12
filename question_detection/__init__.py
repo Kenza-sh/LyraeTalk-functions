@@ -66,7 +66,7 @@ Réponds uniquement par **“globale”** ou **“précise”**, sans aucun autr
 """
     response = client.chat.completions.create(
         model="gpt-35-turbo",
-        temperature=0,
+        temperature=0.8,
         messages=[
             {"role": "user", "content": prompt}
         ]
