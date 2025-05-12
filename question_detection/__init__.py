@@ -22,7 +22,7 @@ QUESTION_WORDS = [
     'à quel point', 'depuis quand', 'jusqu\'à quand',
     'à qui', 'avec qui', "à quel tarif","par où", "vers où","à quelle distance",
   "en quoi", "à quel point","pour quelle raison", "dans quel but",
-"sous quelle condition", "dans quel contexte","jusqu'à quand",
+"sous quelle condition", "dans quel contexte","jusqu'à quand",'depuis quand',
 "depuis combien de temps","pendant combien de temps", "en quelle année",
 "où est-ce que", "quand est-ce que", "pourquoi est-ce que", "qui est-ce que",
  'à qui', 'avec qui', 'pour qui', 'chez qui', 'contre qui', 
@@ -47,26 +47,21 @@ def contains_question_word(sentence: str) -> bool:
 
 def classify_sentence(sentence):
     prompt = f"""
-Tu es un classifieur de questions.
-Je te donnerai une phrase et tu devras indiquer si c’est :
-1. une question globale : formulation vague ou générale, sans éléments spécifiques.
-   Exemples :
-     – “Puis-je avoir des informations ?”
-     – “Je voudrais me renseigner.”
-     – “Pouvez-vous me donner des renseignements ?”
-     – “Je veux obtenir des infos.”
-2. une question précise : demande claire avec un sujet ou un détail spécifique.
-   Exemples :
-     – “Je voudrais connaître le coût d’une consultation.”
-     – “Quelles sont les horaires d’ouverture de votre cabinet ?”
-     – “Pouvez-vous me dire les tarifs des examens d’écho ?”
-     – “Je veux des infos sur les différents sites du centre de radiologie.”
+Vous êtes un modèle de classification de phrases.
+Je te donnerai une phrase et tu devras indiquer si elle est:
+-globale : formulation vague ou générale, sans éléments spécifiques.
+-précise : demande claire incluant un sujet ou un détail spécifique 
+Exemples :
+     – Entrée : “Puis-je avoir des informations ?” Sortie : globale
+     – Entrée : “J'aimerais poser une question.” Sortie : globale
+     – Entrée : “Je voudrais connaître le coût d’une consultation.” Sortie : précise  
+     – Entrée : “Je veux des infos sur les différents sites du centre de radiologie.” Sortie : précise
 Phrase à classifier : {sentence}
-Réponds uniquement par **“globale”** ou **“précise”**, sans aucun autre texte.
+Réponds uniquement par *globale* ou *précise*, sans aucun autre texte.
 """
     response = client.chat.completions.create(
         model="gpt-35-turbo",
-        temperature=0.5,
+        temperature=0.3,
         messages=[
             {"role": "user", "content": prompt}
         ]
