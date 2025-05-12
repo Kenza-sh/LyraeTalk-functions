@@ -47,17 +47,11 @@ def contains_question_word(sentence: str) -> bool:
 
 def classify_sentence(sentence):
     prompt = f"""
-Vous êtes un modèle de classification de phrases.
-Je te donnerai une phrase et tu devras indiquer si elle est:
--globale : formulation vague ou générale, sans éléments spécifiques.
--précise : demande claire incluant un sujet ou un détail spécifique 
-Exemples :
-     – Entrée : “Puis-je avoir des informations ?” Sortie : globale
-     – Entrée : “J'aimerais poser une question.” Sortie : globale
-     – Entrée : “Je voudrais connaître le coût d’une consultation.” Sortie : précise  
-     – Entrée : “Je veux des infos sur les différents sites du centre de radiologie.” Sortie : précise
+Vous êtes un assistant chargé d’analyser la phrase d’un utilisateur pour déterminer :
+1. Si l’utilisateur a **déjà posé** sa question dans cette phrase (cas “posed”),  
+2. Ou s’il a **seulement exprimé l’intention** de poser une question sans en donner le contenu (cas “intent_only”).
 Phrase à classifier : {sentence}
-Réponds uniquement par *globale* ou *précise*, sans aucun autre texte.
+Répondez uniquement par `posed` ou `intent_only`, en minuscules, sans ponctuation ni texte additionnel.
 """
     response = client.chat.completions.create(
         model="gpt-35-turbo",
@@ -69,7 +63,7 @@ Réponds uniquement par *globale* ou *précise*, sans aucun autre texte.
 
     classification = (response.choices[0].message.content).strip().lower()
     logging.info(f"le résultat du llm est {classification}")
-    return 'globale' not in classification
+    return 'posed' in classification
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
