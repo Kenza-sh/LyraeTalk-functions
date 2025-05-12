@@ -66,13 +66,14 @@ Réponds uniquement par **“globale”** ou **“précise”**, sans aucun autr
 """
     response = client.chat.completions.create(
         model="gpt-35-turbo",
-        temperature=0.8,
+        temperature=0.5,
         messages=[
             {"role": "user", "content": prompt}
         ]
     )
 
     classification = (response.choices[0].message.content).strip().lower()
+    logging.info(f"le résultat du llm est {classification}")
     return 'globale' not in classification
 
 
@@ -90,6 +91,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=400
             )
         if contains_question_word(query) :
+            logging.info("contains question words in the sentence")
             result = True
         else :
               result = classify_sentence(query)
