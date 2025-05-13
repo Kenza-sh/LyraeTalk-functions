@@ -8,8 +8,14 @@ from rapidfuzz import process
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-
+def detecter_lettres_uniques(phrase):
+        pattern = r'\b([a-zA-Z])\b'
+        phrase_sans_ponctuation = re.sub(r"[^\w\s]", '', phrase)
+        lettres = re.findall(pattern, phrase_sans_ponctuation)
+        return ''.join(lettres)
+        
 def retrouver_prenom(personnes, texte):
+    texte = detecter_lettres_uniques(texte)
     noms_famille = [nom.lower() for nom, prenom in personnes]
     resultat = process.extractOne(texte.lower(), noms_famille, score_cutoff=80)
     if resultat:
