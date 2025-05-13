@@ -97,6 +97,8 @@ class InformationExtractor:
         pattern = r'\b([a-zA-Z])\b'
         phrase_sans_ponctuation = re.sub(r"[^\w\s]", '', phrase)
         lettres = re.findall(pattern, phrase_sans_ponctuation)
+        if not lettres :
+                return phrase
         return ''.join(lettres)
     def extraire_nom(self, texte):
         logger.info(f"Extraction du nom à partir du texte : {texte}")
