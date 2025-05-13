@@ -27,24 +27,47 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     try:
-        req_body = req.get_json()
+        # Essayer de parser le JSON
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            return func.HttpResponse(
+                json.dumps({"error": "Le corps de la requête doit être un JSON valide."}),
+                mimetype="application/json",
+                status_code=400
+            )
+
         texte = req_body.get('text')
         personnes = req_body.get('patient_list')
 
+        # Vérifier la présence des champs
         if not texte or not personnes:
             return func.HttpResponse(
-                json.dumps({"error": "Both 'text' and 'patient_list' must be provided in the request body"}),
+                json.dumps({"error": "Les champs 'text' et 'patient_list' sont obligatoires."}),
                 mimetype="application/json",
                 status_code=400
             )
-        if not isinstance(personnes, list) or not all(isinstance(p, (list, tuple)) and len(p) == 2 and all(isinstance(x, str) for x in p)  for p in personnes):
-             return func.HttpResponse(
-                json.dumps({"error": "Le champ 'personnes' doit être une liste de paires (nom, prénom) de chaînes de caractères."}),
+
+        # Vérification de la structure de patient_list
+        if not isinstance(personnes, list):
+            return func.HttpResponse(
+                json.dumps({"error": "'patient_list' doit être une liste."}),
                 mimetype="application/json",
                 status_code=400
             )
-                 
+
+        for p in personnes:
+            if not isinstance(p, (list, tuple)) or len(p) != 2 or not all(isinstance(x, str) for x in p):
+                return func.HttpResponse(
+                    json.dumps({"error": "Chaque élément de 'patient_list' doit être une paire (nom, prénom) de chaînes de caractères."}),
+                    mimetype="application/json",
+                    status_code=400
+                )
+
+        # Conversion explicite en tuples
         personnes = [tuple(p) for p in personnes]
+
+        # Appel de la fonction de traitement
         nom, prenom = retrouver_prenom(personnes, texte)
 
         return func.HttpResponse(
@@ -53,10 +76,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     except Exception as e:
-        logging.error(f"Error processing request: {str(e)}")
+        logging.error(f"Erreur lors du traitement de la requête : {str(e)}")
         return func.HttpResponse(
-            json.dumps({"error": str(e)}),
+            json.dumps({"error": "Erreur interne du serveur."}),
             mimetype="application/json",
             status_code=500
         )
-           
