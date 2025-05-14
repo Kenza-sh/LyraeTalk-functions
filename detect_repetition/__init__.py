@@ -71,7 +71,7 @@ Répondez uniquement par `True` ou `False`, sans ponctuation ni texte additionne
 
     classification = (response.choices[0].message.content).strip().lower()
     logging.info(f"le résultat du llm est {classification}")
-    return 'True' in classification
+    return 'true' in classification
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
