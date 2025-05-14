@@ -14,21 +14,25 @@ client = AzureOpenAI(
 llm_model="gpt-35-turbo"
 
 QUESTION_WORDS = [
-    'comment', 'quand', 'où', 'pourquoi', 'qui', 'que', 'combien',
-    'quel', 'quelle', 'quels', 'quelles','lequel', 'laquelle', 'lesquels',
-    'lesquelles','est-ce que', 'est ce que',
-    'à quelle heure', 'à quel moment', 'à combien',
-    'en quoi', 'de quelle façon', 'de quelle manière',
-    'à quel point', 'depuis quand', 'jusqu\'à quand',
-    'à qui', 'avec qui', "à quel tarif","par où", "vers où","à quelle distance",
-  "en quoi", "à quel point","pour quelle raison", "dans quel but",
-"sous quelle condition", "dans quel contexte","jusqu'à quand",'depuis quand',
-"depuis combien de temps","pendant combien de temps", "en quelle année",
-"où est-ce que", "quand est-ce que", "pourquoi est-ce que", "qui est-ce que",
- 'à qui', 'avec qui', 'pour qui', 'chez qui', 'contre qui', 
-'à quoi', 'avec quoi', 'sans quoi', 'dans quoi', 
-    
+    'est-ce que', 'est ce que', "est-ce qu'il", "est ce qu'il", "est-ce qu'on", "est ce qu'on", "est-ce que tu", "est ce que tu",
+    'à quelle heure', 'à quel moment', 'à combien', 'à quel point', 'à quel tarif', 'à quelle distance',
+    'en quoi', 'de quelle façon', 'de quelle manière', 'dans quel but', 'dans quel contexte',
+    'depuis quand', "jusqu'à quand", 'depuis combien de temps', 'pendant combien de temps', 'en quelle année',
+    'par où', 'vers où', 'où est-ce que', 'quand est-ce que', 'pourquoi est-ce que', 'qui est-ce que',
+    'à qui', 'avec qui', 'pour qui', 'chez qui', 'contre qui', 'de qui', 'sans qui', 'derrière qui', 'devant qui',
+    'par qui', 'sur qui', 'près de qui', 'loin de qui',
+    'à quoi', 'avec quoi', 'sans quoi', 'dans quoi',
+    'peux-tu', 'as-tu', 'sais-tu', 'connais-tu', 'veux-tu', 'vas-tu', 'faut-il', 'dois-tu',
+    'peut-on', 'doit-on', 'devrait-on', 'voudrais-tu', 'voudriez-vous',
+    "c'est quoi", "c'est qui", "ça veut dire quoi", "ça sert à quoi",
+    'que faire', 'que peut-on', 'que devons-nous', 'que dois-je',
+    'savoir si', 'je me demande si', "si c'est", 'si je', 'si tu', 'voir si', 'vérifier si',
+    'si on', 'si nous', 'si vous', "s'il", "s'ils", 'si il', 'si ils', 'si elle', 'si elles',
+    'comment', 'quand', 'où', 'pourquoi', 'combien', 'quoi',
+    'quel', 'quelle', 'quels', 'quelles',
+    'lequel', 'laquelle', 'lesquels', 'lesquelles'
 ]
+
 
 _pattern = re.compile(
     r'\b(?:' + '|'.join(re.escape(w) for w in QUESTION_WORDS) + r')\b',
