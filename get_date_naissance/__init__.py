@@ -97,6 +97,15 @@ class InformationExtractor:
     def extraire_date_naissance(self, texte):
         logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
         texte=self.replace_numbers_in_string(texte)
+        short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
+        if short_date_match:
+            jour, mois, annee = short_date_match.groups()
+            if len(annee) == 2:
+                annee = '19' + annee if int(annee) > 30 else '20' + annee
+            normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
+            logger.info(f"Date courte détectée et normalisée : {normalized}")
+            texte = texte.replace(short_date_match.group(0), normalized)
+            
         entities = self.get_entities(texte)
         logger.info(entities)
         entities= self.reconstruct_entities(entities)
