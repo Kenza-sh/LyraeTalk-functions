@@ -6,6 +6,8 @@ import os
 from openai import AzureOpenAI
 import re
 import logging
+import unicodedata
+
 client = AzureOpenAI(
             azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
             api_key=os.environ.get("AZURE_OPENAI_API_KEY"),
@@ -75,6 +77,17 @@ class ExamenFetcher:
             titre_normalise = re.sub(pattern, replacement, titre_normalise, flags=re.IGNORECASE)
         logging.warning(f"Texte aprés processing {titre_normalise}")
         return titre_normalise
+                
+    def normalize_to_compare(self , text):
+            text = text.replace("’", "'").replace("‘", "'").replace("‛", "'")
+            text = text.replace("“", '"').replace("”", '"')
+            text = text.lower()
+            text = unicodedata.normalize('NFD', text)
+            text = ''.join(char for char in text if unicodedata.category(char) != 'Mn')
+            text = re.sub(r"[,:.!?]", "", text)
+            text = re.sub(r"\s+", " ", text).strip()
+            return text
+                
     def normalize_examen(self , text):
                 if not isinstance(text, str):
                         return text
@@ -127,6 +140,7 @@ class ExamenFetcher:
                 except requests.RequestException as e:
                     logging.info(f"Erreur lors de la requête pour {id}: {e}")
         return data
+                
     def get_class(self, text, data):
         custom_prompt_template = (
             f"Voici la liste des examens médicaux proposés par notre centre d'imagerie médicale : {', '.join(data.values())}. \n"
@@ -150,7 +164,8 @@ class ExamenFetcher:
             logging.error(f"Error answering query: {e}")
             return ''
     def equiv(self, a, b):
-         return a.replace("’", "'").lower() == b.replace("’", "'").lower()
+         return self.normalize_to_compare(a) == self.normalize_to_compare(b)
+                
     def lyae_talk_exam(self, texte):
       exam_types = {
           "RADIO": "RX",
