@@ -53,7 +53,13 @@ class ExamenFetcher:
                 r'echocardiographie': "ECHOCARDIOGRAPHIE (ÉCHOGRAPHIE DU CŒUR)",
                 r'cerebro[- ]?scanner': "CEREBROSCANNER (SCANNER DU CERVEAU)",
                 r'echographie[- ]?endor[ée]?ctale': "ÉCHOGRAPHIE ENDORÉCTALE (ÉCHOGRAPHIE DU RECTUM)",
-                r'echographie[- ]?endovaginale': "ÉCHOGRAPHIE ENDOVAGINALE (ÉCHOGRAPHIE DU VAGIN ET DE L'UTÉRUS)"}
+                r'echographie[- ]?endovaginale': "ÉCHOGRAPHIE ENDOVAGINALE (ÉCHOGRAPHIE DU VAGIN ET DE L'UTÉRUS)",
+                r'hystérosalpingographie': "HYSTÉROSALPINGOGRAPHIE (RADIOGRAPHIE DE L'APPAREIL GÉNITAL INTERNE DE LA FEMME)",
+                r'ostéodensitométrie': "OSTÉODENSITOMÉTRIE (RADIOGRAPHIE DES OS)",
+                r'uroscanner': "Uroscanner (scanner de l'appareil urinaire)",
+                r'arthroscanner':"Arthroscanner (scanner des articulations)",
+                r'ETF' :"Échographie transfontanellaire encéphale (ETF)"
+        }
 
         self.keywords = {
             "RADIO": ["radio", "radiographie"],
@@ -91,6 +97,7 @@ class ExamenFetcher:
         if not texte or not texte.strip():
             logging.warning("Texte vide ou invalide fourni à get_type_examen")
             return "AUTRE"
+        texte=texte.lower()
         for category, words in self.keywords.items():
             if any(word in texte for word in words):
                 logging.info(f"Type d'examen identifié: {category}")
