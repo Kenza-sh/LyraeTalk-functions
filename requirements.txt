@@ -11,5 +11,4 @@ python-docx
 faiss-cpu
 unidecode
 rapidfuzz
-unicodedata
 
