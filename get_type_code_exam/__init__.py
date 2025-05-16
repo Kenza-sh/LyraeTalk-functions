@@ -67,6 +67,7 @@ class ExamenFetcher:
         titre_normalise = texte.lower()
         for pattern, replacement in self.replacements.items():
             titre_normalise = re.sub(pattern, replacement, titre_normalise, flags=re.IGNORECASE)
+        logging.warning(f"Texte aprés processing {titre_normalise}")
         return titre_normalise
     def normalize_examen(self , text):
                 if not isinstance(text, str):
