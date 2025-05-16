@@ -146,7 +146,8 @@ class ExamenFetcher:
         except Exception as e:
             logging.error(f"Error answering query: {e}")
             return "Une erreur est survenue lors de la réponse."
-     
+    def equiv(self, a, b):
+         return a.replace("’", "'").lower() == b.replace("’", "'").lower()
     def lyae_talk_exam(self, texte):
       exam_types = {
           "RADIO": "RX",
@@ -165,7 +166,7 @@ class ExamenFetcher:
       
       actes = self.fetch_examens([id])
       code_exam = self.get_class(texte, actes)
-      code_exam_id = next((k for k, v in actes.items() if v == code_exam), None)
+      code_exam_id = next((k for k, v in actes.items() if self.equiv(v, code_exam )), None)
       if code_exam=='None':
          code_exam= None
       else :
