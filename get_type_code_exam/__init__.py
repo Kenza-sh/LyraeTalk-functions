@@ -142,10 +142,13 @@ class ExamenFetcher:
                 ],
             )
             logging.info(f"Réponse du modèle : {completion.choices[0].message.content}")
-            return completion.choices[0].message.content
+            res = (completion.choices[0].message.content)
+            if res :
+                 res = re.sub(r"[,:.!?]", "", res)
+            return  res
         except Exception as e:
             logging.error(f"Error answering query: {e}")
-            return "Une erreur est survenue lors de la réponse."
+            return ''
     def equiv(self, a, b):
          return a.replace("’", "'").lower() == b.replace("’", "'").lower()
     def lyae_talk_exam(self, texte):
