@@ -79,13 +79,14 @@ class ExamenFetcher:
         return titre_normalise
                 
     def normalize_to_compare(self , text):
-            text = text.replace("’", "'").replace("‘", "'").replace("‛", "'")
-            text = text.replace("“", '"').replace("”", '"')
-            text = text.lower()
-            text = unicodedata.normalize('NFD', text)
-            text = ''.join(char for char in text if unicodedata.category(char) != 'Mn')
-            text = re.sub(r"[,:.!?]", "", text)
-            text = re.sub(r"\s+", " ", text).strip()
+            if text :
+                        text = text.replace("’", "'").replace("‘", "'").replace("‛", "'")
+                        text = text.replace("“", '"').replace("”", '"')
+                        text = text.lower()
+                        text = unicodedata.normalize('NFD', text)
+                        text = ''.join(char for char in text if unicodedata.category(char) != 'Mn')
+                        text = re.sub(r"[,:.!?]", "", text)
+                        text = re.sub(r"\s+", " ", text).strip()
             return text
                 
     def normalize_examen(self , text):
