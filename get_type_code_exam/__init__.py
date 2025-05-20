@@ -45,11 +45,7 @@ class ExamenFetcher:
                 r'hystérosalpingographie': "HYSTÉROSALPINGOGRAPHIE (RADIOGRAPHIE DE LA CAVITÉ UTÉRINE)",
                 r'cone[- ]?beam': "CONE BEAM (RADIOGRAPHIE DES DENTS)",
                 r'tomographie': "TOMOGRAPHIE (RADIOGRAPHIE DES DENTS)",
-                r'doppler': "DOPPLER (ÉCHOGRAPHIE DES VAISSEAUX)",
-                r'eco': "échographie",
-                r'radio': "radiographie",
-                r'mamo': "mammographie",
-                r'mammo': "mammographie",
+                r'doppler': "DOPPLER (ÉCHOGRAPHIE DES VAISSEAUX)",               
                 r'ct' :"scanner",
                 r'echodoppler': "ECHODOPPLER (ÉCHOGRAPHIE DOPPLER)",
                 r'echocardiographie': "ECHOCARDIOGRAPHIE (ÉCHOGRAPHIE DU CŒUR)",
@@ -67,7 +63,7 @@ class ExamenFetcher:
             "RADIO": ["radio", "radiographie","téléradiographie","teleradiographie"],
             "SCANNER": ["scanner", "tdm", "tomodensitométrie", "scan","angioscanner"],
             "IRM": ["irm", "imagerie par résonance magnétique",'rmn'],
-            "ECHOGRAPHIE": ["echo", "écho", "échographie", "echographie", "échotomographie"],
+            "ECHOGRAPHIE": ["echo", "écho", "échographie", "echographie", "échotomographie",'eco','éco'],
             "MAMMOGRAPHIE": ["mammographie", "mammogramme", "mammo", "mamographie","mamo", "sein", "mammaire"],
             'IMAGERIE':['imagerie']
         }
