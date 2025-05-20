@@ -107,17 +107,26 @@ class ExamenFetcher:
                     normalized = re.sub(pat, repl, normalized, flags=re.IGNORECASE)
                 return normalized
                 
-    def get_type_examen(self , titre):
-      if not titre or not titre.strip():
-            return "AUTRE"
-      titre_normalise = titre.lower()
-      for pattern, replacement in self.replacements.items():
-          titre_normalise = re.sub(pattern, replacement, titre_normalise, flags=re.IGNORECASE)
-      for category, words in self.keywords.items():
-          if any(word in titre_normalise for word in words):
-              return category
-      print(f"pour {titre} c est autre")
-      return "AUTRE"
+    def get_type_examen(self, texte):
+                if not texte or not texte.strip():
+                    logging.warning("Texte vide ou invalide fourni à get_type_examen")
+                    return "AUTRE"
+                texte = texte.lower()
+                texte = texte.replace("’", "'")  # Apostrophe typographique
+                texte = unicodedata.normalize("NFKD", texte)  # Supprime accents
+                texte = ''.join(c for c in texte if not unicodedata.combining(c))
+                mots = re.findall(r"\b\w+\b", texte)
+                for category, words in self.keywords.items():
+                    cleaned_words = [
+                        ''.join(c for c in unicodedata.normalize("NFKD", w.lower()) if not unicodedata.combining(c))
+                        for w in words
+                    ]
+                    if any(word in mots for word in cleaned_words):
+                        logging.info(f"Type d'examen identifié: {category}")
+                        return category
+            
+                logging.info("Aucun type d'examen trouvé, retour par défaut: AUTRE")
+                return "AUTRE"
 
                 
     def fetch_examens(self, ids=None):
