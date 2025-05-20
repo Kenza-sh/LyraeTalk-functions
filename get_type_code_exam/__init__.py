@@ -186,7 +186,7 @@ class ExamenFetcher:
           "MAMMOGRAPHIE": "MG",
           'AUTRE' :None
       }
-      #texte=self.process_text(texte)
+      texte=self.process_text(texte)
       type_exam = self.get_type_examen(texte)
       id = exam_types.get(type_exam)
       if not id:
