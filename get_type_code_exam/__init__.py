@@ -108,16 +108,19 @@ class ExamenFetcher:
                 return normalized
                 
     def get_type_examen(self , texte):
-        if not texte or not texte.strip():
-            logging.warning("Texte vide ou invalide fourni à get_type_examen")
-            return "AUTRE"
-        texte=texte.lower()
-        for category, words in self.keywords.items():
-            if any(word in texte for word in words):
-                logging.info(f"Type d'examen identifié: {category}")
-                return category
-        logging.info("Aucun type d'examen trouvé, retour par défaut: AUTRE")
-        return "AUTRE"
+                if not texte or not texte.strip():
+                    logging.warning("Texte vide ou invalide fourni à get_type_examen")
+                    return "AUTRE"
+                texte = texte.lower()
+                mots = re.findall(r"\b\w+\b", texte)  # liste de mots, sans ponctuation
+            
+                for category, words in self.keywords.items():
+                    if any(word in mots for word in words):
+                        logging.info(f"Type d'examen identifié: {category}")
+                        return category
+            
+                logging.info("Aucun type d'examen trouvé, retour par défaut: AUTRE")
+                return "AUTRE"
 
     def fetch_examens(self, ids=None):
         if ids is None:
