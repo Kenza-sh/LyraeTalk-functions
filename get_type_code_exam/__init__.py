@@ -65,10 +65,10 @@ class ExamenFetcher:
 
         self.keywords = {
             "RADIO": ["radio", "radiographie"],
-            "SCANNER": ["scanner", "tdm", "tomodensitométrie", "scan"],
+            "SCANNER": ["scanner", "tdm", "tomodensitométrie", "scan","angioscanner"],
             "IRM": ["irm", "imagerie par résonance magnétique",'rmn'],
             "ECHOGRAPHIE": ["echo", "écho", "échographie", "echographie", "échotomographie"],
-            "MAMMOGRAPHIE": ["mammographie", "mammogramme", "mammo", "mamographie", "sein", "mammaire"],
+            "MAMMOGRAPHIE": ["mammographie", "mammogramme", "mammo", "mamographie","mamo", "sein", "mammaire"],
             'IMAGERIE':['imagerie']
         }
     def process_text(self , texte):
@@ -109,19 +109,26 @@ class ExamenFetcher:
                 
     def get_type_examen(self , texte):
                 if not texte or not texte.strip():
-                    logging.warning("Texte vide ou invalide fourni à get_type_examen")
-                    return "AUTRE"
+                   logging.warning("Texte vide ou invalide fourni à get_type_examen")
+                   return "AUTRE"
                 texte = texte.lower()
-                mots = re.findall(r"\b\w+\b", texte)  # liste de mots, sans ponctuation
+                texte = texte.replace("’", "'")  # Apostrophe typographique
+                texte = unicodedata.normalize("NFKD", texte)  # Supprime accents
+                texte = ''.join(c for c in texte if not unicodedata.combining(c))
+            
+                mots = re.findall(r"\b\w+\b", texte)
             
                 for category, words in self.keywords.items():
-                    if any(word in mots for word in words):
+                    cleaned_words = [
+                        ''.join(c for c in unicodedata.normalize("NFKD", w.lower()) if not unicodedata.combining(c))
+                        for w in words
+                    ]
+                    if any(word in mots for word in cleaned_words):
                         logging.info(f"Type d'examen identifié: {category}")
                         return category
-            
                 logging.info("Aucun type d'examen trouvé, retour par défaut: AUTRE")
                 return "AUTRE"
-
+                
     def fetch_examens(self, ids=None):
         if ids is None:
             ids = self.ids_base
@@ -160,7 +167,7 @@ class ExamenFetcher:
                 ],
             )
             logging.info(f"Réponse du modèle : {completion.choices[0].message.content}")
-            res = (completion.choices[0].message.content)
+            res = (completion.choices[0].message.content).strip()
             if res :
                  res = re.sub(r"[,:.!?]", "", res)
             return  res
