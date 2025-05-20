@@ -30,7 +30,26 @@ human_assistant_keywords = [
   r"\bstoppez le chatbot\b",r"\bje veux une vraie assistante au bout du fil\b",r"\bce robot ne me convient pas\b",
   r"\barrêtez le chatbot\b",r"\bpas ce chat\b",r"\bpas à un robot\b",r"\bmerci de ne plus utiliser le chatbot\b",
   r"\bmerci de passer au mode humain\b",r"\best-ce que je peux joindre quelqu’un en direct\b",r"\bpas d’IA\b",
-  r"\bsecrétaire\b",r"\bassistante\b",r"\bsecrétariat\b",r"\bhumaine\b",r"\bhumain\b",r"\bcollaboratrice\b",r"\bcollaborateur\b",
+    r"\b(parler|discuter|échanger).*?\b(avec|à)\s+une\s+secrétaire\b",
+    r"\b(parler|discuter|échanger).*?\b(avec|à)\s+une\s+assistante\b",
+    r"\b(parler|discuter|échanger).*?\b(avec|à)\s+une\s+collaboratrice\b",
+    r"\b(parler|discuter|échanger).*?\b(avec|à)\s+un\s+collaborateur\b",
+    r"\b(transférer|passer|rediriger).*?\b(à|vers)\s+une\s+secrétaire\b",
+    r"\b(transférer|passer|rediriger).*?\b(à|vers)\s+une\s+assistante\b",
+    r"\b(transférer|passer|rediriger).*?\b(à|vers)\s+une\s+collaboratrice\b",
+    r"\b(transférer|passer|rediriger).*?\b(à|vers)\s+un\s+collaborateur\b",
+    r"\b(joindre|contacter).*?\b(le|la)\s+(secrétariat|secrétaire|assistante|collaboratrice|collaborateur)\b",
+    r"\b(acceder|avoir accès).*?\b(à|au)\s+(secrétariat|à une secrétaire|à une assistante)\b",
+    r"\b(je veux|je souhaite).*?\b(parler|joindre|contacter).*?\b(une|un)\s+(secrétaire|assistante|collaborateur|collaboratrice)\b",
+    r"\b(parler|discuter|échanger|voir|appeler|contacter|joindre).*?\b(avec|à)\s+(une|la)\s+(secrétaire|assistante|collaboratrice)\b",
+    r"\b(parler|discuter|échanger|voir|appeler|contacter|joindre).*?\b(avec|à)\s+(un|le)\s+(collaborateur)\b",
+    r"\b(transférer|passer|rediriger|mettre en relation|me passer).*?\b(à|vers)\s+(une|la)\s+(secrétaire|assistante|collaboratrice)\b",
+    r"\b(transférer|passer|rediriger|mettre en relation|me passer).*?\b(à|vers)\s+(un|le)\s+(collaborateur)\b",
+    r"\b(je veux|je souhaite|j’aimerais|je désire|il me faut|je préfère).*?\b(parler|échanger|joindre|voir|contacter).*?\b(une|un|la|le)\s+(secrétaire|assistante|collaborateur|collaboratrice)\b",
+    r"\b(joindre|contacter|appeler|voir).*?\b(le|la)\s+(secrétariat|secrétaire|assistante|collaboratrice|collaborateur)\b",
+    r"\b(acceder|avoir accès|être mis en relation|obtenir un contact).*?\b(à|au)\s+(secrétariat|à une secrétaire|à une assistante|à un collaborateur)\b",
+    r"\b(est-ce que|est-il possible|puis-je|serait-il possible).*?\b(parler|joindre|échanger).*?\b(avec|à)\s+(une|un)\s+(secrétaire|assistante|collaborateur|collaboratrice)\b",
+    r"\b(parler|joindre|échanger).*?\b(une|un)\s+(personne|humain|interlocuteur|agent)\b.*?\b(pas un robot|vraie personne|en direct)\b"
 ]
 patterns = [re.compile(p, re.IGNORECASE) for p in human_assistant_keywords]
 def is_human_assistant_request(text: str) -> bool:
