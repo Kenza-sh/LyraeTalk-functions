@@ -64,7 +64,7 @@ class ExamenFetcher:
         }
 
         self.keywords = {
-            "RADIO": ["radio", "radiographie","téléradiographie","teleradiographie],
+            "RADIO": ["radio", "radiographie","téléradiographie","teleradiographie"],
             "SCANNER": ["scanner", "tdm", "tomodensitométrie", "scan","angioscanner"],
             "IRM": ["irm", "imagerie par résonance magnétique",'rmn'],
             "ECHOGRAPHIE": ["echo", "écho", "échographie", "echographie", "échotomographie"],
