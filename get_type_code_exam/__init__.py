@@ -107,7 +107,7 @@ class ExamenFetcher:
                     normalized = re.sub(pat, repl, normalized, flags=re.IGNORECASE)
                 return normalized
                 
-    def get_type_examen(self , texte):
+    def get_type_examen(self , titre):
       if not titre or not titre.strip():
             return "AUTRE"
       titre_normalise = titre.lower()
