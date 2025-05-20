@@ -163,10 +163,10 @@ class ExamenFetcher:
                 ],
             )
             logging.info(f"Réponse du modèle : {completion.choices[0].message.content}")
-            res = (completion.choices[0].message.content).strip()
+            res = (completion.choices[0].message.content)
             if res :
-                 res = re.sub(r"[,:.!?]", "", res)
-            return  res
+                 res = (re.sub(r"[,:.!?]", "", res)).strip()
+            return res
         except Exception as e:
             logging.error(f"Error answering query: {e}")
             return ''
