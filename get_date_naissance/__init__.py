@@ -92,7 +92,8 @@ class InformationExtractor:
 
     def is_future_date(self, birth_date):
         today = datetime.today()
-        return birth_date > today
+        min_date = datetime(1900, 1, 1)
+        return birth_date > today or birth_date < min_date
         
     def extraire_date_naissance(self, texte):
         logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
