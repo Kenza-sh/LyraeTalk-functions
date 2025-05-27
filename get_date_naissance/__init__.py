@@ -105,11 +105,13 @@ class InformationExtractor:
                 current_year = datetime.now().year
                 pivot = current_year % 100
                 century = current_year - pivot
+                logger.info(f"century est : {century}")
                 annee_int = int(annee)
                 if annee_int > pivot:
                     annee = str(century - 100 + annee_int)  # siècle précédent
                 else:
                     annee = str(century + annee_int)        # siècle actuel
+            logger.info(f"annee est est : {annee}")
             normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
             logger.info(f"Date courte détectée et normalisée : {normalized}")
             texte = texte.replace(short_date_match.group(0), normalized)
