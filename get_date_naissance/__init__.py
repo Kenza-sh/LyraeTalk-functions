@@ -102,7 +102,14 @@ class InformationExtractor:
         if short_date_match:
             jour, mois, annee = short_date_match.groups()
             if len(annee) == 2:
-                annee = '19' + annee if int(annee) > 30 else '20' + annee
+                current_year = datetime.now().year
+                pivot = current_year % 100
+                century = current_year - pivot
+                annee_int = int(annee)
+                if annee_int > pivot:
+                    annee = str(century - 100 + annee_int)  # siècle précédent
+                else:
+                    annee = str(century + annee_int)        # siècle actuel
             normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
             logger.info(f"Date courte détectée et normalisée : {normalized}")
             texte = texte.replace(short_date_match.group(0), normalized)
