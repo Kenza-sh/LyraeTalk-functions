@@ -98,25 +98,50 @@ class InformationExtractor:
     def extraire_date_naissance(self, texte):
         logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
         texte=self.replace_numbers_in_string(texte)
-        short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
-        logger.info(f"short_date_match : {short_date_match}")
-        if short_date_match:
-            jour, mois, annee = short_date_match.groups()
-            if len(annee) == 2:
-                current_year = datetime.now().year
-                pivot = current_year % 100
-                century = current_year - pivot
-                logger.info(f"century est : {century}")
-                annee_int = int(annee)
-                if annee_int > pivot:
-                    annee = str(century - 100 + annee_int)  # siècle précédent
-                else:
-                    annee = str(century + annee_int)        # siècle actuel
-            logger.info(f"annee est est : {annee}")
-            normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
-            logger.info(f"Date courte détectée et normalisée : {normalized}")
-            texte = texte.replace(short_date_match.group(0), normalized)
-            
+        textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
+        if textual_date_match:
+            jour, mois_str, annee = textual_date_match.groups()
+            mois_map = {
+                "janvier": "01", "février": "02", "fevrier": "02", "mars": "03",
+                "avril": "04", "mai": "05", "juin": "06", "juillet": "07",
+                "août": "08", "aout": "08", "septembre": "09", "octobre": "10",
+                "novembre": "11", "décembre": "12", "decembre": "12"
+            }
+        
+            mois = mois_map.get(mois_str.lower())
+            if mois:
+                if len(annee) == 2:
+                    current_year = datetime.now().year
+                    current_century = current_year // 100
+                    pivot = (current_year % 100) + 10
+                    annee_int = int(annee)
+                    if annee_int > pivot:
+                        annee = str((current_century - 1) * 100 + annee_int)
+                    else:
+                        annee = str(current_century * 100 + annee_int)
+                normalized = f"{jour.zfill(2)} {mois} {annee}"
+                logger.info(f"Date textuelle détectée et normalisée : {normalized}")
+                texte = texte.replace(textual_date_match.group(0), normalized)
+        else :        
+            short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
+            logger.info(f"short_date_match : {short_date_match}")
+            if short_date_match:
+                jour, mois, annee = short_date_match.groups()
+                if len(annee) == 2:
+                    current_year = datetime.now().year
+                    pivot = current_year % 100
+                    century = current_year - pivot
+                    logger.info(f"century est : {century}")
+                    annee_int = int(annee)
+                    if annee_int > pivot:
+                        annee = str(century - 100 + annee_int)  # siècle précédent
+                    else:
+                        annee = str(century + annee_int)        # siècle actuel
+                logger.info(f"annee est est : {annee}")
+                normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
+                logger.info(f"Date courte détectée et normalisée : {normalized}")
+                texte = texte.replace(short_date_match.group(0), normalized)
+                
         entities = self.get_entities(texte)
         logger.info(entities)
         entities= self.reconstruct_entities(entities)
