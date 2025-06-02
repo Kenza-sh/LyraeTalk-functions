@@ -60,11 +60,11 @@ class ExamenFetcher:
         }
 
         self.keywords = {
-            "RADIO": ["radio", "radiographie","téléradiographie","teleradiographie"],
+            "RADIO": ["radio", "radiographie","téléradiographie","teleradiographie",'radiologie',"radioscopie","radiologique"],
             "SCANNER": ["scanner", "tdm", "tomodensitométrie", "scan","angioscanner"],
             "IRM": ["irm", "imagerie par résonance magnétique",'rmn'],
-            "ECHOGRAPHIE": ["echo", "écho", "échographie", "echographie", "échotomographie",'eco','éco'],
-            "MAMMOGRAPHIE": ["mammographie", "mammogramme", "mammo", "mamographie","mamo", "sein", "mammaire"],
+            "ECHOGRAPHIE": ["echo", "écho", "échographie","échographique","echographique","echographie", "échotomographie",'eco','éco'],
+            "MAMMOGRAPHIE": ["mammographie","mammographique", "mammogramme", "mammo", "mamographie","mamo", "sein", "mammaire"],
             'IMAGERIE':['imagerie']
         }
     def process_text(self , texte):
