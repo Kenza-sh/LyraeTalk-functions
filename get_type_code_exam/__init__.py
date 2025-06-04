@@ -57,7 +57,7 @@ class ExamenFetcher:
                 r'uroscanner': "Uroscanner (scanner de l'appareil urinaire)",
                 r'arthroscanner':"Arthroscanner (scanner des articulations)",
                 r'etf' :"Échographie transfontanellaire encéphale (ETF)",
-                r'tap" : "SCANNER THORACO-ABDOMINO-PELVIEN (TAP)",
+                r'tap': "SCANNER THORACO-ABDOMINO-PELVIEN (TAP)",
                 r"eos": "Radiographie corps entier en station debout (système EOS)",
                 r"(?i)^tdm$": "Tomodensitométrie (scanner)",
                 r"(?i)^tsa$": "Scanner thoracique (avec ou sans angioscanner) TSA",
@@ -67,7 +67,6 @@ class ExamenFetcher:
                 r"(?i)^tdm\s?coronaire$": "Scanner coronaire",
                 r"(?i)^wb[-\s]?irm$|^whole[\s_-]?body[\s_-]?irm$": "IRM corps entier (Whole Body MRI)",
                 r"(?i)^uro[-\s]?irm$": "IRM des voies urinaires (URO-IRM)",
-                r"\bradio\b": "Radiographie",
                     
                     
             
@@ -112,6 +111,7 @@ class ExamenFetcher:
                     r"\bIRM\s+Genou\b": "IRM du genou",
                     r"\bIRM\s+Bras\b": "IRM du Bras",
                     r"\bIRM\s+Bassin\b": "IRM du Bassin",
+                    r"\bRadio\b": "Radiographie",
                     
                    }
                 normalized = text
