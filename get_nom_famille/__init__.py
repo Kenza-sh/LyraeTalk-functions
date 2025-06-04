@@ -89,13 +89,13 @@ class InformationExtractor:
         if not check_str(msg_2_check):
             logger.warning(f"Le message {msg_2_check} n'est pas une chaîne valide.")
             return False
-        if not re.match(r"^[a-zA-ZÀ-ÿ' -]+$", msg_2_check):
+        if not re.match(r"^[A-Za-zÀ-ÿ]+(?:[-'\s][A-Za-zÀ-ÿ]+)*$", msg_2_check):
             logger.warning(f"Le message {msg_2_check} contient des caractères invalides.")
             return False
         return True
     def detecter_lettres_uniques(self , phrase):
-        pattern = r'\b([a-zA-Z])\b'
-        phrase_sans_ponctuation = re.sub(r"[^\w\s]", '', phrase)
+        pattern =  r'\b([a-zA-ZÀ-ÿ])\b'
+        phrase_sans_ponctuation = re.sub(r"[^\w\s-]", '', phrase)
         lettres = re.findall(pattern, phrase_sans_ponctuation)
         if not lettres :
                 return phrase
