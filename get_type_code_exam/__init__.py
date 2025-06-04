@@ -56,13 +56,27 @@ class ExamenFetcher:
                 r'ostéodensitométrie': "OSTÉODENSITOMÉTRIE (RADIOGRAPHIE DES OS)",
                 r'uroscanner': "Uroscanner (scanner de l'appareil urinaire)",
                 r'arthroscanner':"Arthroscanner (scanner des articulations)",
-                r'ETF' :"Échographie transfontanellaire encéphale (ETF)"
+                r'etf' :"Échographie transfontanellaire encéphale (ETF)",
+                r'tap" : "SCANNER THORACO-ABDOMINO-PELVIEN (TAP)",
+                r"eos": "Radiographie corps entier en station debout (système EOS)",
+                r"(?i)^tdm$": "Tomodensitométrie (scanner)",
+                r"(?i)^tsa$": "Scanner thoracique (avec ou sans angioscanner) TSA",
+                r"(?i)^angio[\s-]?tsa$": "Angio-scanner des troncs supra-aortiques (Angio-TSA)",
+                r"(?i)^télécr[aâ]ne$": "Radiographie du crâne à distance (profil/face) télécrane",
+                r"(?i)^angio[\s-]?tdm$": "Angio-scanner (scanner vasculaire)",
+                r"(?i)^tdm\s?coronaire$": "Scanner coronaire",
+                r"(?i)^wb[-\s]?irm$|^whole[\s_-]?body[\s_-]?irm$": "IRM corps entier (Whole Body MRI)",
+                r"(?i)^uro[-\s]?irm$": "IRM des voies urinaires (URO-IRM)",
+                r"\bradio\b": "Radiographie",
+                    
+                    
+            
         }
 
         self.keywords = {
             "RADIO": ["radio", "radiographie","téléradiographie","teleradiographie",'radiologie',"radioscopie","radiologique"],
-            "SCANNER": ["scanner", "tdm", "tomodensitométrie", "scan","angioscanner"],
-            "IRM": ["irm", "imagerie par résonance magnétique",'rmn'],
+            "SCANNER": ["scanner", "tdm", "tomodensitométrie", "scan","angioscanner","angio-scanner"],
+            "IRM": ["irm", "imagerie par résonance magnétique",'rmn','mri'],
             "ECHOGRAPHIE": ["echo", "écho", "échographie","échographique","echographique","echographie", "échotomographie",'eco','éco'],
             "MAMMOGRAPHIE": ["mammographie","mammographique", "mammogramme", "mammo", "mamographie","mamo", "sein", "mammaire"],
             'IMAGERIE':['imagerie']
@@ -97,7 +111,9 @@ class ExamenFetcher:
                     r"\bIRM\s+Cheville\b": "IRM de la cheville",
                     r"\bIRM\s+Genou\b": "IRM du genou",
                     r"\bIRM\s+Bras\b": "IRM du Bras",
-                    r"\bIRM\s+Bassin\b": "IRM du Bassin",  }
+                    r"\bIRM\s+Bassin\b": "IRM du Bassin",
+                    
+                   }
                 normalized = text
                 for pat, repl in patterns.items():
                     normalized = re.sub(pat, repl, normalized, flags=re.IGNORECASE)
@@ -152,7 +168,7 @@ class ExamenFetcher:
         custom_prompt_template = (
             f"Voici la liste des examens médicaux proposés par notre centre d'imagerie médicale : {', '.join(data.values())}. \n"
             f"Veuillez analyser la phrase suivante exprimée par un patient et identifier l'examen le plus adapté à son besoin. "
-            f"Répondez uniquement par le nom de l'examen correspondant.Si aucun ne convient répondre par 'None' "
+            f"Répondez uniquement par le nom 'exact' et 'complet' de l'examen correspondant.Si aucun ne convient répondre par 'None' "
         )
         try:
             completion = client.chat.completions.create(
