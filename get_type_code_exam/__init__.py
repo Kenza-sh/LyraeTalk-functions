@@ -59,15 +59,13 @@ class ExamenFetcher:
                 r'etf' :"Échographie transfontanellaire encéphale (ETF)",
                 r'tap': "SCANNER THORACO-ABDOMINO-PELVIEN (TAP)",
                 r"eos": "Radiographie corps entier en station debout (système EOS)",
-                r"(?i)^tdm$": "Tomodensitométrie (scanner)",
-                r"(?i)^tsa$": "Scanner thoracique (avec ou sans angioscanner) TSA",
-                r"(?i)^angio[\s-]?tsa$": "Angio-scanner des troncs supra-aortiques (Angio-TSA)",
-                r"(?i)^télécr[aâ]ne$": "Radiographie du crâne à distance (profil/face) télécrane",
-                r"(?i)^angio[\s-]?tdm$": "Angio-scanner (scanner vasculaire)",
-                r"(?i)^tdm\s?coronaire$": "Scanner coronaire",
-                r"(?i)^wb[-\s]?irm$|^whole[\s_-]?body[\s_-]?irm$": "IRM corps entier (Whole Body MRI)",
-                r"(?i)^uro[-\s]?irm$": "IRM des voies urinaires (URO-IRM)",
-                    
+                r"tdm": "Tomodensitométrie (scanner)",
+                r"tsa": "Scanner thoracique (avec ou sans angioscanner) TSA",
+                r"angio[- ]?tsa": "Angio-scanner des troncs supra-aortiques (Angio-TSA)",
+                r"télécr[aâ]ne": "Radiographie du crâne à distance (profil/face) télécrane",
+                r"angio[- ]?tdm": "Angio-scanner (scanner vasculaire)",
+                r"whole[- ]?body[- ]?mri": "IRM corps entier (Whole Body MRI)",
+                r"uro[- ]?irm": "IRM des voies urinaires (URO-IRM)",
                     
             
         }
