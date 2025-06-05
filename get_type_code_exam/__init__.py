@@ -66,6 +66,7 @@ class ExamenFetcher:
                 r"angio[- ]?tdm": "Angio-scanner (scanner vasculaire)",
                 r"whole[- ]?body[- ]?mri": "IRM corps entier (Whole Body MRI)",
                 r"uro[- ]?irm": "IRM des voies urinaires (URO-IRM)",
+               r"dépistage" :"détection précoce",
                     
             
         }
