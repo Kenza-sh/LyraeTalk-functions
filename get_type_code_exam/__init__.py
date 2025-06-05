@@ -213,6 +213,9 @@ class ExamenFetcher:
          code_exam= None
       else :
           code_exam = self.normalize_examen(str(code_exam))
+      if id=="MG" and code_exam_id is None :
+                  code_exam ="Mammographie Bilatérale"
+                  code_exam_id = "N01MGBIL"
       logging.info(f"Résultat final: Type {type_exam}, ID {id}, Code Examen {code_exam}, Exam Code {code_exam_id}")
       return type_exam,id, code_exam , code_exam_id
 
