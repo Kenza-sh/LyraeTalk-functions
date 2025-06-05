@@ -165,12 +165,14 @@ class ExamenFetcher:
     def get_class(self, text, data):
         custom_prompt_template = (
             f"Voici la liste des examens médicaux proposés par notre centre d'imagerie médicale : {', '.join(data.values())}. \n"
-            f"Veuillez analyser la phrase suivante exprimée par un patient et identifier l'examen le plus adapté à son besoin. "
-            f"Répondez uniquement par le nom 'exact' et 'complet' de l'examen correspondant.Si aucun ne convient répondre par 'None' "
+            f"Analyse la phrase suivante exprimée par un patient et identifie l'examen le plus adapté à son besoin. "
+            f"Répondez uniquement par le 'nom exact et complet' de l'examen correspondant , tel qu'il figure dans la liste ci-dessus.
+            Si aucun ne convient répondre par 'None' "
         )
         try:
             completion = client.chat.completions.create(
                 model=self.llm_model,
+                temperature=0,
                 messages=[
                     {"role": "system", "content": custom_prompt_template},
                     {"role": "user", "content": text}
