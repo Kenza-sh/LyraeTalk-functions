@@ -14,23 +14,47 @@ client = AzureOpenAI(
 llm_model="gpt-35-turbo"
 
 QUESTION_WORDS = [
-    'est-ce que', 'est ce que', "est-ce qu'il", "est ce qu'il", "est-ce qu'on", "est ce qu'on", "est-ce que tu", "est ce que tu",
-    'à quelle heure', 'à quel moment', 'à combien', 'à quel point', 'à quel tarif', 'à quelle distance',
-    'en quoi', 'de quelle façon', 'de quelle manière', 'dans quel but', 'dans quel contexte',
-    'depuis quand', "jusqu'à quand", 'depuis combien de temps', 'pendant combien de temps', 'en quelle année',
-    'par où', 'vers où', 'où est-ce que', 'quand est-ce que', 'pourquoi est-ce que', 'qui est-ce que',
-    'à qui', 'avec qui', 'pour qui', 'chez qui', 'contre qui', 'de qui', 'sans qui', 'derrière qui', 'devant qui',
-    'par qui', 'sur qui', 'près de qui', 'loin de qui',
-    'à quoi', 'avec quoi', 'sans quoi', 'dans quoi',
-    'peux-tu', 'as-tu', 'sais-tu', 'connais-tu', 'veux-tu', 'vas-tu', 'faut-il', 'dois-tu',
-    'peut-on', 'doit-on', 'devrait-on', 'voudrais-tu', 'voudriez-vous',
-    "c'est quoi", "c'est qui", "ça veut dire quoi", "ça sert à quoi",
-    'que faire', 'que peut-on', 'que devons-nous', 'que dois-je',
-    'savoir si', 'je me demande si', "si c'est", 'si je', 'si tu', 'voir si', 'vérifier si',
-    'si on', 'si nous', 'si vous', "s'il", "s'ils", 'si il', 'si ils', 'si elle', 'si elles',
-    'comment', 'quand', 'où', 'pourquoi', 'combien', 'quoi',
-    'quel', 'quelle', 'quels', 'quelles',
-    'lequel', 'laquelle', 'lesquels', 'lesquelles'
+    # Formes avec "est-ce que"
+    "est-ce que", "est ce que", "est-ce qu’il", "est ce qu’il",
+    "est-ce qu’on", "est ce qu’on", "est-ce que tu", "est ce que tu",
+    "est-ce que vous", "est ce que vous", "est-ce que je", "est ce que je",
+
+    # Questions temporelles
+    "à quelle heure", "à quel moment", "depuis quand", "jusqu’à quand",
+    "pendant combien de temps", "en quelle année", "à quelle date",
+
+    # Questions de mesure
+    "à combien", "combien de temps", "combien de fois", "à quel point", "à quel tarif", "à quelle distance", "combien ça coûte",
+
+    # Questions de manière / but
+    "en quoi", "de quelle façon", "de quelle manière", "comment faire pour", "dans quel but", "dans quel contexte", "à quoi ça sert",
+
+    # Questions spatiales
+    "par où", "vers où", "où est-ce que", "où se trouve", "où peut-on",
+
+    # Questions causales / explicatives
+    "pourquoi est-ce que", "pourquoi", "dans quelle mesure",
+
+    # Questions avec "qui"
+    "qui est-ce que", "à qui", "avec qui", "pour qui", "chez qui", "contre qui",
+    "de qui", "sans qui", "derrière qui", "devant qui", "par qui", "sur qui",
+    "près de qui", "loin de qui", "qui", "c’est qui", "c’est à qui", "c’est de qui",
+
+    # Questions avec "quoi"
+    "à quoi", "avec quoi", "sans quoi", "dans quoi", "c’est quoi", "ça veut dire quoi", "ça sert à quoi", "de quoi s’agit-il",
+
+    # Formes interrogatives avec verbe
+    "peux-tu", "peux-vous", "pouvez-vous", "as-tu", "avez-vous", "sais-tu", "savez-vous",
+    "connais-tu", "connaissez-vous", "veux-tu", "voulez-vous", "vas-tu", "allez-vous",
+    "faut-il", "dois-tu", "doit-on", "devrait-on", "voudrais-tu", "voudriez-vous",
+
+    # Questions directes ou indirectes
+    "que faire", "que peut-on", "que devons-nous", "que dois-je", "quoi faire", "qu’est-ce qu’on peut faire",
+    "savoir si", "je me demande si", "j’aimerais savoir", "je voudrais savoir", "voir si", "vérifier si",
+
+    # Interrogatifs simples
+    "comment", "quand", "où", "pourquoi", "combien", "quoi",
+    "quel", "quelle", "quels", "quelles", "lequel", "laquelle", "lesquels", "lesquelles"
 ]
 
 
