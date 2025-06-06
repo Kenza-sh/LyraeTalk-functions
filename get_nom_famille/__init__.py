@@ -120,7 +120,7 @@ class InformationExtractor:
         phrase_sans_ponctuation = re.sub(r'\s+', ' ', phrase_sans_ponctuation).strip()
         logger.info(f"Phrase après traitement des chiffres suivis de lettres : {phrase_sans_ponctuation}")
         phrase_sans_ponctuation = re.sub(r"\s*([\-'§])\s*", r'\1', phrase_sans_ponctuation)
-         logger.info(f"Phrase après suppression des espaces autour des séparateurs : {phrase_sans_ponctuation}")
+        logger.info(f"Phrase après suppression des espaces autour des séparateurs : {phrase_sans_ponctuation}")
         if '§' in phrase_sans_ponctuation:
                 phrase_sans_ponctuation=re.sub(r'§', ' ', phrase_sans_ponctuation)
         logger.info(f"Résultat final : {phrase_sans_ponctuation}")
