@@ -67,14 +67,20 @@ class ExamenFetcher:
                 r"whole[- ]?body[- ]?mri": "IRM corps entier (Whole Body MRI)",
                 r"uro[- ]?irm": "IRM des voies urinaires (URO-IRM)",
                r"dépistage" :"détection précoce",
+               r"uroirm" :"IRM des voies urinaires (URO-IRM)",
+               "uroscan" :"Uroscanner (scanner de l'appareil urinaire)",
+               r'dacryoscan': "DACRYOSCANNER (SCANNER DES VOIES LACRYMALES)",
+                r'coroscan': "COROSCANNER (SCANNER DES ARTÈRES DU CŒUR)",
+                r'entéroscan': "ENTEROSCANNER (SCANNER DE L'INTESTIN)",
+                r'coloscan': "COLOSCANNER (SCANNER DU COLON)",
                     
             
         }
 
         self.keywords = {
             "RADIO": ["radio", "radiographie","téléradiographie","teleradiographie",'radiologie',"radioscopie","radiologique"],
-            "SCANNER": ["scanner", "tdm", "tomodensitométrie", "scan","angioscanner","angio-scanner"],
-            "IRM": ["irm", "imagerie par résonance magnétique",'rmn','mri'],
+            "SCANNER": ["scanner", "tdm", "tomodensitométrie", "scan","angioscanner","angio-scanner","anteroscanner" ,"enteroscanner"],
+            "IRM": ["irm", "imagerie par résonance magnétique",'rmn','mri',"uro-irm","uroirm"],
             "ECHOGRAPHIE": ["echo", "écho", "échographie","échographique","echographique","echographie", "échotomographie",'eco','éco'],
             "MAMMOGRAPHIE": ["mammographie","mammographique", "mammogramme", "mammo", "mamographie","mamo", "sein", "mammaire"],
             'IMAGERIE':['imagerie']
@@ -173,7 +179,7 @@ class ExamenFetcher:
         try:
             completion = client.chat.completions.create(
                 model=self.llm_model,
-                temperature=0,
+                temperature=0.3,
                 messages=[
                     {"role": "system", "content": custom_prompt_template},
                     {"role": "user", "content": text}
