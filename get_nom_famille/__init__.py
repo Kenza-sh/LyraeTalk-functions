@@ -93,19 +93,59 @@ class InformationExtractor:
             logger.warning(f"Le message {msg_2_check} contient des caractères invalides.")
             return False
         return True
-    def detecter_lettres_uniques(self , phrase):
+    def detecter_lettres_uniques1(self , phrase):
         pattern =  r'\b([a-zA-ZÀ-ÿ])\b'
         phrase_sans_ponctuation = re.sub(r"[^\w\s-]", '', phrase)
         lettres = re.findall(pattern, phrase_sans_ponctuation)
         if not lettres :
                 return phrase
         return ''.join(lettres)
+
+    def repeat_match(self , m):
+        count = int(m.group(1))
+        char = m.group(2)
+        return (char +' ') * count
+        
+    def extraire_mots_decores(self , text):
+        tokens = text.split()
+        mots_retrouves = []
+        i = 0
+        pattern = re.compile(r"^[A-Za-z'\-§]$")
+        while i < len(tokens):
+            if pattern.fullmatch(tokens[i]):
+                debut = i
+                while i < len(tokens) and pattern.fullmatch(tokens[i]):
+                    i += 1
+                mot = "".join(tokens[debut:i])
+                if re.search(r"[A-Za-z]", mot):
+                    mots_retrouves.append(mot)
+            else:
+                i += 1
+        return mots_retrouves
+
+    def detecter_lettres_uniques( self , phrase):
+            phrase =phrase.lower().strip()
+            phrase_sans_ponctuation = re.sub(r"[.,;:!?*#@]+", '', phrase)
+            phrase_sans_ponctuation = re.sub(r"[\"'<>{}\[\]()]", '', phrase_sans_ponctuation)
+            replacements = { r"\btiret\b": "-", r"\bapostrophe\b": "'",r"\bespace\b": "§",}
+            for pattern, symbol in replacements.items():
+                phrase_sans_ponctuation = re.sub(pattern, symbol, phrase_sans_ponctuation, flags=re.IGNORECASE)
+            phrase_sans_ponctuation = re.sub(r'\b(\d+)\s?([a-zA-Z*#@&/\-_+=.,!?\'"])', self.repeat_match, phrase_sans_ponctuation)
+            phrase_sans_ponctuation = re.sub(r'\s+', ' ', phrase_sans_ponctuation).strip()
+            resultats =self.extraire_mots_decores(phrase_sans_ponctuation)
+            if not resultats :
+                phrase_sans_ponctuation = re.sub(r"\s*([\-'§])\s*", r'\1', phrase_sans_ponctuation)
+                if '§' in phrase_sans_ponctuation:
+                    phrase_sans_ponctuation=re.sub(r'§', ' ', phrase_sans_ponctuation)
+                return phrase_sans_ponctuation
+            return ' '.join([s.replace('§', ' ') for s in resultats])
+        
     def extraire_nom(self, texte):
         logger.info(f"Extraction du nom à partir du texte : {texte}")
         nom=self.detecter_lettres_uniques(texte)
         if nom :
             texte = f"Mon nom de famille est {nom} "
-        entities = self.get_entities(texte)
+        entities = self.get_entities(nom)
         logger.info(entities)
         entities= self.reconstruct_entities(entities)
         for ent in entities:
