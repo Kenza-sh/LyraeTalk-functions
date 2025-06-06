@@ -145,7 +145,6 @@ class InformationExtractor:
                     phrase_sans_ponctuation=re.sub(r'§', ' ', phrase_sans_ponctuation)
                 return phrase_sans_ponctuation
             resultat_final = ' '.join([s.replace('§', ' ') for s in resultats if not s.startswith(('-', "'", '§'))])
-        return 
             logger.debug(f"Résultat final : {resultat_final}")
             return resultat_final
         
