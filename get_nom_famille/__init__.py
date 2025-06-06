@@ -144,7 +144,8 @@ class InformationExtractor:
                 if '§' in phrase_sans_ponctuation:
                     phrase_sans_ponctuation=re.sub(r'§', ' ', phrase_sans_ponctuation)
                 return phrase_sans_ponctuation
-            resultat_final = ' '.join([s.replace('§', ' ') for s in resultats])
+            resultat_final = ' '.join([s.replace('§', ' ') for s in resultats if not s.startswith(('-', "'", '§'))])
+        return 
             logger.debug(f"Résultat final : {resultat_final}")
             return resultat_final
         
@@ -153,7 +154,7 @@ class InformationExtractor:
         nom=self.detecter_lettres_uniques(texte)
         if nom :
             texte = f"Mon nom de famille est {nom} "
-        entities = self.get_entities(nom)
+        entities = self.get_entities(texte)
         logger.info(entities)
         entities= self.reconstruct_entities(entities)
         for ent in entities:
