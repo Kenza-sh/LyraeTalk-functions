@@ -105,48 +105,26 @@ class InformationExtractor:
     def repeat_match(self , m):
         count = int(m.group(1))
         char = m.group(2)
-        return (char +' ') * count
+        return char * count
         
-    def extraire_mots_decores(self , text):
-        tokens = text.split()
-        mots_retrouves = []
-        i = 0
-        pattern = re.compile(r"^[A-Za-z'\-§]$")
-        while i < len(tokens):
-            if pattern.fullmatch(tokens[i]):
-                debut = i
-                while i < len(tokens) and pattern.fullmatch(tokens[i]):
-                    i += 1
-                mot = "".join(tokens[debut:i])
-                if re.search(r"[A-Za-z]", mot):
-                    mots_retrouves.append(mot)
-            else:
-                i += 1
-        return mots_retrouves
-
     def detecter_lettres_uniques( self , phrase):
-            logger.info(f"Phrase initiale : {phrase}")
-            phrase =phrase.lower().strip()
-            phrase_sans_ponctuation = re.sub(r"[.,;:!?*#@]+", '', phrase)
-            phrase_sans_ponctuation = re.sub(r"[\"'<>{}\[\]()]", '', phrase_sans_ponctuation)
-            replacements = { r"\btiret\b": "-", r"\bapostrophe\b": "'",r"\bespace\b": "§",}
-            for pattern, symbol in replacements.items():
-                phrase_sans_ponctuation = re.sub(pattern, symbol, phrase_sans_ponctuation, flags=re.IGNORECASE)
-            logger.info(f"Phrase après remplacements spéciaux : {phrase_sans_ponctuation}")
-            phrase_sans_ponctuation = re.sub(r'\b(\d+)\s?([a-zA-Z*#@&/\-_+=.,!?\'"])', self.repeat_match, phrase_sans_ponctuation)
-            logger.info(f"Phrase après traitement des chiffres suivis de lettres : {phrase_sans_ponctuation}")
-            phrase_sans_ponctuation = re.sub(r'\s+', ' ', phrase_sans_ponctuation).strip()
-            resultats =self.extraire_mots_decores(phrase_sans_ponctuation)
-            logger.info(f"Résultats extraits : {resultats}")
-            if not resultats :
-                phrase_sans_ponctuation = re.sub(r"\s*([\-'§])\s*", r'\1', phrase_sans_ponctuation)
-                logger.info(f"Phrase après suppression des espaces autour des séparateurs : {phrase_sans_ponctuation}")
-                if '§' in phrase_sans_ponctuation:
-                    phrase_sans_ponctuation=re.sub(r'§', ' ', phrase_sans_ponctuation)
-                return phrase_sans_ponctuation
-            resultat_final = ' '.join([s.replace('§', ' ') for s in resultats if not s.startswith(('-', "'", '§'))])
-            logger.info(f"Résultat final : {resultat_final}")
-            return resultat_final
+        logger.info(f"Phrase initiale : {phrase}")
+        phrase =phrase.lower().strip()
+        phrase_sans_ponctuation = re.sub(r"[.,;:!?*#@]+", '', phrase)
+        phrase_sans_ponctuation = re.sub(r"[\"'<>{}\[\]()]", '', phrase_sans_ponctuation)
+        replacements = { r"\btiret\b": "-", r"\bapostrophe\b": "'",r"\bespace\b": "§",}
+        for pattern, symbol in replacements.items():
+            phrase_sans_ponctuation = re.sub(pattern, symbol, phrase_sans_ponctuation, flags=re.IGNORECASE)
+        logger.info(f"Phrase après remplacements spéciaux : {phrase_sans_ponctuation}")
+        phrase_sans_ponctuation = re.sub(r'\s*(\d+)\s*([a-zA-Z*#@&/\-_+=.,!?\'"])', self.repeat_match, phrase_sans_ponctuation)
+        phrase_sans_ponctuation = re.sub(r'\s+', ' ', phrase_sans_ponctuation).strip()
+        logger.info(f"Phrase après traitement des chiffres suivis de lettres : {phrase_sans_ponctuation}")
+        phrase_sans_ponctuation = re.sub(r"\s*([\-'§])\s*", r'\1', phrase_sans_ponctuation)
+         logger.info(f"Phrase après suppression des espaces autour des séparateurs : {phrase_sans_ponctuation}")
+        if '§' in phrase_sans_ponctuation:
+                phrase_sans_ponctuation=re.sub(r'§', ' ', phrase_sans_ponctuation)
+        logger.info(f"Résultat final : {phrase_sans_ponctuation}")
+        return phrase_sans_ponctuation
         
     def extraire_nom(self, texte):
         logger.info(f"Extraction du nom à partir du texte : {texte}")
