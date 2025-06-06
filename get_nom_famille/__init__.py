@@ -125,27 +125,27 @@ class InformationExtractor:
         return mots_retrouves
 
     def detecter_lettres_uniques( self , phrase):
-            logger.debug(f"Phrase initiale : {phrase}")
+            logger.info(f"Phrase initiale : {phrase}")
             phrase =phrase.lower().strip()
             phrase_sans_ponctuation = re.sub(r"[.,;:!?*#@]+", '', phrase)
             phrase_sans_ponctuation = re.sub(r"[\"'<>{}\[\]()]", '', phrase_sans_ponctuation)
             replacements = { r"\btiret\b": "-", r"\bapostrophe\b": "'",r"\bespace\b": "§",}
             for pattern, symbol in replacements.items():
                 phrase_sans_ponctuation = re.sub(pattern, symbol, phrase_sans_ponctuation, flags=re.IGNORECASE)
-            logger.debug(f"Phrase après remplacements spéciaux : {phrase_sans_ponctuation}")
+            logger.info(f"Phrase après remplacements spéciaux : {phrase_sans_ponctuation}")
             phrase_sans_ponctuation = re.sub(r'\b(\d+)\s?([a-zA-Z*#@&/\-_+=.,!?\'"])', self.repeat_match, phrase_sans_ponctuation)
-            logger.debug(f"Phrase après traitement des chiffres suivis de lettres : {phrase_sans_ponctuation}")
+            logger.info(f"Phrase après traitement des chiffres suivis de lettres : {phrase_sans_ponctuation}")
             phrase_sans_ponctuation = re.sub(r'\s+', ' ', phrase_sans_ponctuation).strip()
             resultats =self.extraire_mots_decores(phrase_sans_ponctuation)
-            logger.debug(f"Résultats extraits : {resultats}")
+            logger.info(f"Résultats extraits : {resultats}")
             if not resultats :
                 phrase_sans_ponctuation = re.sub(r"\s*([\-'§])\s*", r'\1', phrase_sans_ponctuation)
-                logger.debug(f"Phrase après suppression des espaces autour des séparateurs : {phrase_sans_ponctuation}")
+                logger.info(f"Phrase après suppression des espaces autour des séparateurs : {phrase_sans_ponctuation}")
                 if '§' in phrase_sans_ponctuation:
                     phrase_sans_ponctuation=re.sub(r'§', ' ', phrase_sans_ponctuation)
                 return phrase_sans_ponctuation
             resultat_final = ' '.join([s.replace('§', ' ') for s in resultats if not s.startswith(('-', "'", '§'))])
-            logger.debug(f"Résultat final : {resultat_final}")
+            logger.info(f"Résultat final : {resultat_final}")
             return resultat_final
         
     def extraire_nom(self, texte):
