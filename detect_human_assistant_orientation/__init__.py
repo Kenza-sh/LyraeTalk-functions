@@ -13,23 +13,19 @@ client = AzureOpenAI(
         )
 llm_model="gpt-35-turbo"
 human_assistant_keywords = [
-   r"\béquipe secrétariat\b",r"\bservice des assistantes\b",r"\binterlocuteur\b",r"\bcontact physique\b",
-  r"\bquelqu'un\b",r"\bcontact humain\b",r"\bcontact direct\b",r"\bprise en charge humaine\b",r"\bsupport administratif\b",
-  r"\baide administrative\b",r"\bpersonnel administratif\b",r"\baccompagnement\b",r"\bpoint de contact humain\b",
-  r"\béchange direct\b",r"\bcellule d'assistance\b",r"\bpersonne référente\b",r"\blien humain\b",r"\bcoordination humaine\b",
-  r"\bservice relationnel\b",r"\bagent administratif\b",r"\brelation humaine directe\b",r"\brelation humaine\b",
-  r"\bmembre de l'équipe support\b",r"\brelais humain\b",r"\bsupport opérationnel\b",r"\bpôle administratif\b",
-  r"\bparler à une vraie personne\b",r"\bje ne veux pas parler à un robot\b",r"\bquelqu’un au téléphone\b",
-  r"\bme transférer à une secrétaire ou à une personne du cabinet\b",r"\bje veux parler à quelqu’un\b",
-  r"\brelation avec une personne\b",r"\bparler à quelqu’un de vrai\b",
-  r"\bje refuse de continuer cette conversation avec une machine\b",r"\bje refuse l’assistance automatisée\b",
-  r"\bje refuse l’assistant automatisé\b",r"\bje souhaite qu’une vraie personne prenne le relais\b",
-  r"\bparler à un membre de votre équipe\b",r"\brelation avec un agent humain\b",r"\bavec une personne réelle\b",
-  r"\bpas à une machine\b",r"\bpas un échange automatisé\b",r"\bje refuse d’utiliser ce service automatisé\b",
-  r"\bavoir un échange téléphonique avec une assistante\b",r"\bmerci de mettre fin à ce chat automatisé\b", r"\bme passer à une collaboratrice\b",
-  r"\bstoppez le chatbot\b",r"\bje veux une vraie assistante au bout du fil\b",r"\bce robot ne me convient pas\b",
-  r"\barrêtez le chatbot\b",r"\bpas ce chat\b",r"\bpas à un robot\b",r"\bmerci de ne plus utiliser le chatbot\b",
-  r"\bmerci de passer au mode humain\b",r"\best-ce que je peux joindre quelqu’un en direct\b",r"\bpas d’IA\b",
+    r"\b(je\s+ne\s+veux\s+pas|j'en\s+ai\s+marre\s+de)\s+(parler|discuter|echanger)\s+(a|avec)\s+(un|ce|votre)\s+(robot|chatbot|ia|machine|automate|assistant\s+automatise)\b",
+    r"\b(stop|arretez|arreter|terminer|quitter|finir)\s+(le|ce)?\s*(robot|chatbot|chat)\b",
+    r"\b(je\s+refuse)\s+l'assistance\s+automatisee\b",
+    r"\bce\s+(robot|chatbot)\s+ne\s+me\s+convient\s+pas\b",
+    r"\b(pas|non)\s+(a|avec)\s+(un|une)\s+(robot|machine|ia|chatbot)\b",
+    r"\b(passer|transferer|rediriger|me\s+mettre\s+en\s+relation\s+avec|me\s+passer)\s+(a|au|vers|le|la)\s+(un|une)?\s*(secretariat|secretaire|assistante|accueil|standard|collaborateur|collaboratrice)\b",
+    r"\b(joindre|contacter|avoir)\s+(le|la|un|une)\s+(secretariat|secretaire|assistante)\b",
+    r"\b(?:pas|sans)\s+(?:un\s+robot|chatbot|IA|automatisation|machine)\b",
+    r"\b(?:refuser|rejeter)\s+l['’]assistance\s+automatique\b",
+    r"\b(?:transf[éeè]rer|passer|rediriger|mettre\s+en\s+relation)\s+(?:moi\s+)?(?:vers|à)\s+(?:une\s+)?(?:secr[éeé]taire|assistant[e]?|collaborateur|collaboratrice)\b",
+    r"\b(?:joindre|contacter|voir)\s+(?:le\s+)?(?:secr[éeé]tariat|(?:un|une)\s+(?:r[éeé]f[éeé]rent[e]?|agent)\s+humain)\b",
+    r"\b(?:est-ce\s+que|est-il\s+possible|comment|o[ùu])\s+[\w\s]*?\b(?:joindre|contacter|parler)\s+[àa]\s+une\s+personne\b",
+    r"\bpuis-je\s+(?:être\s+mis\s+en\s+relation|parler)\s+avec\s+un\s+humain\s?\?",
     r"\b(parler|discuter|échanger).*?\b(avec|à)\s+une\s+secrétaire\b",
     r"\b(parler|discuter|échanger).*?\b(avec|à)\s+une\s+assistante\b",
     r"\b(parler|discuter|échanger).*?\b(avec|à)\s+une\s+collaboratrice\b",
@@ -57,17 +53,26 @@ def is_human_assistant_request(text: str) -> bool:
     return any(p.search(text_norm) for p in patterns)
   
 def classify_sentence(sentence):
-    prompt = f"""Votre rôle est d'identifier si la phrase d'un utilisateur demande explicitement à être redirigé vers un humain (assistant médical ou secrétariat) et non vers un agent automatisé (robot). 
-Exemples de requêtes pertinentes :  
-- « Puis-je parler à une personne réelle ? »  
-- « Je souhaite être mis en contact avec le secrétariat »  
-- « Est-il possible d'avoir un assistant en direct ? »  
-Phrase à analyser : {sentence}  
+    prompt = f"""Votre rôle est d'identifier si la phrase d'un utilisateur demande explicitement à être redirigé vers un humain (assistant médical ou secrétariat) et non vers un agent automatisé (robot).
 Répondez uniquement par `True` ou `False`, sans commentaire ni ponctuation supplémentaire.
-""" 
+
+Exemples de requêtes pertinentes (doivent retourner True) :
+- « Puis-je parler à une personne réelle ? »
+- « Je souhaite être mis en contact avec le secrétariat »
+- « Est-il possible d'avoir un assistant en direct ? »
+- "Je ne veux pas parler à un robot."
+- "Puis-je joindre quelqu’un en direct ?"
+
+Exemples de requêtes non pertinentes (doivent retourner False) :
+- "Quelle est l'heure d'ouverture ?"
+- "Prenez-vous des rendez-vous ?"
+- "Quel est votre adresse ?"
+
+Phrase à analyser : {sentence}
+"""
     response = client.chat.completions.create(
         model="gpt-35-turbo",
-        temperature=0.3,
+        temperature=0.2,
         messages=[
             {"role": "user", "content": prompt}
         ]
