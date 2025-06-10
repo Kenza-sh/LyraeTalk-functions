@@ -106,31 +106,46 @@ class InformationExtractor:
         count = int(m.group(1))
         char = m.group(2)
         return char * count
+
+    def normalize_e_accents_comprehensive(self , text):
+        text = re.sub(r'E\s*accents?\s*grave', 'È', text, flags=re.IGNORECASE)
+        text = re.sub(r'E\s*accents?\s*aigu', 'É', text, flags=re.IGNORECASE)
+        text = re.sub(r'E\s*accents?', 'É', text, flags=re.IGNORECASE)
+        text = re.sub(r'E(?:\s*avec\s*un?)?\s*accents?\s*grave', 'È', text, flags=re.IGNORECASE)
+        text = re.sub(r'E(?:\s*avec\s*un?)?\s*accents?\s*aigu', 'É', text, flags=re.IGNORECASE)
+        text = re.sub(r'E(?:\s*avec\s*un?)?\s*accents?', 'É', text, flags=re.IGNORECASE)
+        return text
+    
+    def detecter_lettres_uniques(self , phrase):
+            logger.info(f"Phrase initiale : {phrase}")
+            phrase_sans_ponctuation = re.sub(r"[.,;:!?*#@]+", '', phrase)
+            phrase_sans_ponctuation = re.sub(r"[\"'<>{}\[\]()]", '', phrase_sans_ponctuation)
+            replacements = { r"\btiret\b": "-", r"\bapostrophe\b": "'",r"\bespace\b": "§",}
+            for pattern, symbol in replacements.items():
+                phrase_sans_ponctuation = re.sub(pattern, symbol, phrase_sans_ponctuation, flags=re.IGNORECASE)
+            logger.info(f"Phrase après remplacements spéciaux : {phrase_sans_ponctuation}")
+            phrase_sans_ponctuation = re.sub(r'\s*(\d+)\s*([a-zA-Z*#@&/\-_+=.,!?\'"])', self.repeat_match, phrase_sans_ponctuation)
+            phrase_sans_ponctuation = re.sub(r'\s+', ' ', phrase_sans_ponctuation).strip()
+            logger.info(f"Phrase après traitement des chiffres suivis de lettres : {phrase_sans_ponctuation}")
+            phrase_sans_ponctuation = re.sub(r"\s*([\-'§])\s*", r'\1', phrase_sans_ponctuation)
+            logger.info(f"Phrase après suppression des espaces autour des séparateurs : {phrase_sans_ponctuation}")
+            if '§' in phrase_sans_ponctuation:
+                    phrase_sans_ponctuation=re.sub(r'§', ' ', phrase_sans_ponctuation)
+            phrase_sans_ponctuation=self.normalize_e_accents_comprehensive(phrase_sans_ponctuation)
+            logger.info(f"Résultat final : {phrase_sans_ponctuation}")
+            return phrase_sans_ponctuation
         
-    def detecter_lettres_uniques( self , phrase):
-        logger.info(f"Phrase initiale : {phrase}")
-        phrase =phrase.lower().strip()
-        phrase_sans_ponctuation = re.sub(r"[.,;:!?*#@]+", '', phrase)
-        phrase_sans_ponctuation = re.sub(r"[\"'<>{}\[\]()]", '', phrase_sans_ponctuation)
-        replacements = { r"\btiret\b": "-", r"\bapostrophe\b": "'",r"\bespace\b": "§",}
-        for pattern, symbol in replacements.items():
-            phrase_sans_ponctuation = re.sub(pattern, symbol, phrase_sans_ponctuation, flags=re.IGNORECASE)
-        logger.info(f"Phrase après remplacements spéciaux : {phrase_sans_ponctuation}")
-        phrase_sans_ponctuation = re.sub(r'\s*(\d+)\s*([a-zA-Z*#@&/\-_+=.,!?\'"])', self.repeat_match, phrase_sans_ponctuation)
-        phrase_sans_ponctuation = re.sub(r'\s+', ' ', phrase_sans_ponctuation).strip()
-        logger.info(f"Phrase après traitement des chiffres suivis de lettres : {phrase_sans_ponctuation}")
-        phrase_sans_ponctuation = re.sub(r"\s*([\-'§])\s*", r'\1', phrase_sans_ponctuation)
-        logger.info(f"Phrase après suppression des espaces autour des séparateurs : {phrase_sans_ponctuation}")
-        if '§' in phrase_sans_ponctuation:
-                phrase_sans_ponctuation=re.sub(r'§', ' ', phrase_sans_ponctuation)
-        logger.info(f"Résultat final : {phrase_sans_ponctuation}")
-        return phrase_sans_ponctuation
+    def get_noms(self , texte):
+      pattern = r"\b[A-ZÀ-ÖØ-Ý]+(?:[-'’\s][A-ZÀ-ÖØ-Ý]+)+\b|\b[A-ZÀ-ÖØ-Ý]{2,}\b"
+      resultats = re.findall(pattern, texte)
+      return resultats
         
     def extraire_nom(self, texte):
         logger.info(f"Extraction du nom à partir du texte : {texte}")
-        nom=self.detecter_lettres_uniques(texte)
-        if nom :
-            texte = f"Mon nom de famille est {nom} "
+        texte=self.detecter_lettres_uniques(texte)
+        resultats = self.get_noms(texte)
+        if resultats :
+            return ' '.join(resultats)
         entities = self.get_entities(texte)
         logger.info(entities)
         entities= self.reconstruct_entities(entities)
