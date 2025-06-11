@@ -108,12 +108,24 @@ class InformationExtractor:
         return char * count
 
     def normalize_e_accents_comprehensive(self , text):
-        text = re.sub(r'E\s*accents?\s*grave', 'È', text, flags=re.IGNORECASE)
-        text = re.sub(r'E\s*accents?\s*aigu', 'É', text, flags=re.IGNORECASE)
-        text = re.sub(r'E\s*accents?', 'É', text, flags=re.IGNORECASE)
-        text = re.sub(r'E(?:\s*avec\s*un?)?\s*accents?\s*grave', 'È', text, flags=re.IGNORECASE)
-        text = re.sub(r'E(?:\s*avec\s*un?)?\s*accents?\s*aigu', 'É', text, flags=re.IGNORECASE)
-        text = re.sub(r'E(?:\s*avec\s*un?)?\s*accents?', 'É', text, flags=re.IGNORECASE)
+        text = re.sub(r'E\s*accents?\s*grave\s*', 'È', text, flags=re.IGNORECASE)
+        text = re.sub(r'E\s*accents?\s*aigu\s*', 'É', text, flags=re.IGNORECASE)
+        text = re.sub(r'E\s*accents?\s*', 'É', text, flags=re.IGNORECASE)
+        text = re.sub(r'E(?:\s*avec\s*un?)?\s*accents?\s*grave\s*', 'È', text, flags=re.IGNORECASE)
+        text = re.sub(r'E(?:\s*avec\s*un?)?\s*accents?\s*aigu\s*', 'É', text, flags=re.IGNORECASE)
+        text = re.sub(r'E(?:\s*avec\s*un?)?\s*accents?\s*', 'É', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bA\s+circonflexe\b', 'Â', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bE\s+circonflexe\b', 'Ê', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bI\s+circonflexe\b', 'Î', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bO\s+circonflexe\b', 'Ô', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bU\s+circonflexe\b', 'Û', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bE\s+tr[eè]ma\b', 'Ë', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bI\s+tr[eè]ma\b', 'Ï', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bU\s+tr[eè]ma\b', 'Ü', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bO\s+tr[eè]ma\b', 'Ö', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bA\s+tr[eè]ma\b', 'Ä', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bY\s+tr[eè]ma\b', 'Ÿ', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bC\s+c[eè]dille\b', 'Ç', text, flags=re.IGNORECASE)
         return text
     
     def detecter_lettres_uniques(self , phrase):
