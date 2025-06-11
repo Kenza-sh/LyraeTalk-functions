@@ -95,7 +95,7 @@ class InformationExtractor:
         return sentence.lower()
         
     def remplacer_mois(self ,text):
-        for mois, num in slef.MONTH_MAP.items():
+        for mois, num in self.MONTH_MAP.items():
             pattern = r'\b' + re.escape(mois) + r'\b'
             text = re.sub(pattern, num, text, flags=re.IGNORECASE)
         return text
