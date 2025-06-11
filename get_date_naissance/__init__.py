@@ -155,7 +155,7 @@ class InformationExtractor:
                 if not match:
                     logger.warning(f"Date incomplète détectée (année absente ou ambiguë) : {date_str}")
                     return f"Date incomplète : {date_str}"
-                date_obj = dateparser.parse(date_str)
+                date_obj = dateparser.parse(date_str, settings={'DATE_ORDER': 'DMY'})
                 if date_obj:
                     formatted_date = date_obj.strftime("%Y-%m-%d")
                     logger.info(f"Date de naissance extraite : {formatted_date}")
