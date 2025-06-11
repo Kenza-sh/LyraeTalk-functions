@@ -11,19 +11,10 @@ from typing import List, Dict
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-
 class InformationExtractor:
     def __init__(self ):
         logger.info("Modèle NER initialisé avec succès.")
-        self.NUMBER_MAP = { "premier": 1, "un": 1, "1er": 1, "deuxième": 2, "deux": 2, "2e": 2}
-        self.MONTH_MAP = {
-            "janvier": "01", "février": "02", "fevrier": "02", "mars": "03",
-            "avril": "04", "mai": "05", "juin": "06", "juillet": "07",
-            "août": "08", "aout": "08", "septembre": "09", "octobre": "10",
-            "novembre": "11", "décembre": "12", "decembre": "12"
-        }
-
-        
+        self.NUMBER_MAP = { "premier": 1, "un": 1, "1er": 1, "deuxième": 2, "deux": 2, "2e": 2}   
     def get_entities(self , texte):
         data = {"inputs": texte}
         body = str.encode(json.dumps(data))
@@ -102,83 +93,60 @@ class InformationExtractor:
         min_date = datetime(1900, 1, 1)
         return birth_date > today or birth_date < min_date
     
-    def remplacer_mois(self ,text):
-        for mois, num in self.MONTH_MAP.items():
-            pattern = r'\b' + re.escape(mois) + r'\b'
-            text = re.sub(pattern, num, text, flags=re.IGNORECASE)
-        return text
-        
-    def normalize_year(self , annee) :
-            if len(annee) == 4:
-                return annee
-            current_year = datetime.now().year
-            pivot = current_year % 100
-            century = current_year - pivot
-            annee_int = int(annee)
-            if annee_int > pivot:
-                year_full = century - 100 + annee_int  # siècle précédent
-            else:
-                year_full = century + annee_int        # siècle actuel
-            logger.info(f"Année courte {annee} normalisée en {year_full}")
-            return str(year_full)   
-        
+                 
     def extraire_date_naissance(self, texte):
         logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
-        texte=self.replace_numbers_in_string(texte)
-        textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
-        if textual_date_match:
-            jour, mois_str, annee = textual_date_match.groups() 
-            mois = self.MONTH_MAP.get(mois_str.lower())
-            if mois:
-                annee = self.normalize_year(annee)
-                normalized = f"{jour.zfill(2)} {mois} {annee}"
-                logger.info(f"Date textuelle détectée et normalisée 1 : {normalized}")
-                texte = texte.replace(textual_date_match.group(0), normalized)
-                logger.info(f"Texte après normalization: {texte}")
-        else :
-            short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
-            logger.info(f"short_date_match : {short_date_match}")
-            if short_date_match:
-                    jour, mois, annee = short_date_match.groups()
-                    annee = self.normalize_year(annee)
-                    logger.info(f"annee est est : {annee}")
-                    normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
-                    logger.info(f"Date courte détectée et normalisée  {normalized}")
-                    texte = texte.replace(short_date_match.group(0), normalized)
-                    logger.info(f"Texte après normalization : {texte}")
+        texte = self.replace_numbers_in_string(texte)
+        # Premier essai avec dateparser
+        date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'})
+        if date_obj:
+            if self.is_future_date(date_obj):
+                logger.warning(f"Date non valide (date dans le futur) : {texte}")
+                return texte
             else:
-                texte_temp =self.remplacer_mois(texte)
-                short_date_match_temp = re.search(r'\b(\d{1,2})\D+(\d{1,2})\D+(\d{2,4})\b', texte_temp)
-                logger.info(f"short_date_match : {short_date_match_temp}")
-                if short_date_match_temp:
-                    jour, mois, annee = short_date_match_temp.groups()
-                    annee_d = self.normalize_year(annee)
-                    logger.info(f"annee est est : {annee_d}")
-                    texte = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, texte)
-                    logger.info(f"Date courte détectée et partiellement normalisée : {texte}") 
-                else :
+                formatted_date = date_obj.strftime("%Y-%m-%d")
+                return formatted_date
+        # Si dateparser ne trouve rien, on tente avec regex
+        jour_pattern = r"(\d{1,2})"
+        mois_pattern = r"(janvier|février|mars|avril|mai|juin|juillet|août|" \
+                       r"septembre|octobre|novembre|décembre|" \
+                       r"janv\.?|févr\.?|avr\.?|juil\.?|sept\.?|oct\.?|nov\.?|déc\.?)"
+        annee_pattern = r"(\d{4})"
+        full_pattern = re.compile(rf"\b{jour_pattern}\s+{mois_pattern}\b.*?{annee_pattern}", re.IGNORECASE)
+        match = full_pattern.search(texte)
+        if match:
+            jour, mois, annee = match.group(1), match.group(2), match.group(3)
+            la_date = f"le {jour} {mois} {annee}"
+            date_obj = dateparser.parse(la_date, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
+            if date_obj:
+                if self.is_future_date(date_obj):
+                    logger.warning(f"Date non valide (date dans le futur) : {la_date}")
                     return texte
-                
+                else:
+                    formatted_date = date_obj.strftime("%Y-%m-%d")
+                    return formatted_date
+        # Si toujours rien, on essaie d'extraire via les entités
         entities = self.get_entities(texte)
-        entities= self.reconstruct_entities(entities)
+        entities = self.reconstruct_entities(entities)
         for ent in entities:
             if ent['entity'] == "I-DATE":
                 date_str = ent['word']
-                logger.info(f"entities a retourné : {date_str}")
-                date_obj = dateparser.parse(date_str, settings={'DATE_ORDER': 'DMY'},languages=['fr'])
+                logger.info(f"Entité date détectée : {date_str}")
+                date_obj = dateparser.parse(date_str, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
                 if date_obj:
-                    formatted_date = date_obj.strftime("%Y-%m-%d")
-                    logger.info(f"Date de naissance extraite : {formatted_date}")
                     if self.is_future_date(date_obj):
                         logger.warning(f"Date non valide (date dans le futur) : {date_str}")
                         return date_str
-                    return formatted_date
+                    else:
+                        formatted_date = date_obj.strftime("%Y-%m-%d")
+                        logger.info(f"Date de naissance extraite : {formatted_date}")
+                        return formatted_date
                 else:
-                    logger.warning(f"Date non valide extraites : {date_str}")
+                    logger.warning(f"Date non valide extraite : {date_str}")
                     return date_str
         logger.warning("Aucune date de naissance n'a été extraite.")
         return None
-      
+               
 extractor = InformationExtractor()
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
