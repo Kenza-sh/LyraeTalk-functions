@@ -111,7 +111,7 @@ class InformationExtractor:
         logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
         texte=self.replace_numbers_in_string(texte)
         texte =self.remplacer_mois(texte)
-        short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
+        short_date_match = re.search(r'\b(\d{1,2}).+?(\d{1,2}).+?(\d{2,4})\b', texte)
         logger.info(f"short_date_match : {short_date_match}")
         if short_date_match:
                 jour, mois, annee = short_date_match.groups()
