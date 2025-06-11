@@ -122,31 +122,6 @@ class InformationExtractor:
     def extraire_date_naissance(self, texte):
             logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
             texte = self.replace_numbers_in_string(texte)
-            date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'})
-            if date_obj :
-                if self.is_future_date(date_obj):
-                     return texte
-                else :
-                     return date_obj.strftime("%Y-%m-%d")
-        
-            # Deuxième essai : regex avec mois textuels
-            jour_pattern = r"(\d{1,2})"
-            mois_pattern = r"(janvier|février|mars|avril|mai|juin|juillet|août|" \
-                           r"septembre|octobre|novembre|décembre|" \
-                           r"janv\.?|févr\.?|avr\.?|juil\.?|sept\.?|oct\.?|nov\.?|déc\.?)"
-            annee_pattern = r"(\d{4})"
-            full_pattern = re.compile(rf"\b{jour_pattern}\s+{mois_pattern}\b.*?{annee_pattern}", re.IGNORECASE)
-            match = full_pattern.search(texte)
-            if match:
-                jour, mois, annee = match.group(1), match.group(2), match.group(3)
-                la_date = f"{jour} {mois} {annee}"
-                date_obj = dateparser.parse(la_date, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
-                if date_obj :
-                    if self.is_future_date(date_obj):
-                         return texte
-                    else :
-                         return date_obj.strftime("%Y-%m-%d")
-        
             # Troisième essai : date textuelle type "1er janvier 2000"
             textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
             if textual_date_match:
@@ -192,6 +167,31 @@ class InformationExtractor:
                              return texte
                         else :
                              return date_obj.strftime("%Y-%m-%d")
+                            
+            date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'})
+            if date_obj :
+                if self.is_future_date(date_obj):
+                     return texte
+                else :
+                     return date_obj.strftime("%Y-%m-%d")
+        
+            # Deuxième essai : regex avec mois textuels
+            jour_pattern = r"(\d{1,2})"
+            mois_pattern = r"(janvier|février|mars|avril|mai|juin|juillet|août|" \
+                           r"septembre|octobre|novembre|décembre|" \
+                           r"janv\.?|févr\.?|avr\.?|juil\.?|sept\.?|oct\.?|nov\.?|déc\.?)"
+            annee_pattern = r"(\d{4})"
+            full_pattern = re.compile(rf"\b{jour_pattern}\s+{mois_pattern}\b.*?{annee_pattern}", re.IGNORECASE)
+            match = full_pattern.search(texte)
+            if match:
+                jour, mois, annee = match.group(1), match.group(2), match.group(3)
+                la_date = f"{jour} {mois} {annee}"
+                date_obj = dateparser.parse(la_date, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
+                if date_obj :
+                    if self.is_future_date(date_obj):
+                         return texte
+                    else :
+                         return date_obj.strftime("%Y-%m-%d")
         
             # Dernière tentative avec entités nommées
             entities = self.reconstruct_entities(self.get_entities(texte))
