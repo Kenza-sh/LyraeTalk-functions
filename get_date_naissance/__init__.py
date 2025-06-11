@@ -150,6 +150,7 @@ class InformationExtractor:
         for ent in entities:
             if ent['entity'] == "I-DATE":
                 date_str = ent['word']
+                logger.info(f"entities a retourné : {date_str}")
                 match = re.search(r'\b((?:19|20)?\d{2})\b', date_str)
                 if not match:
                     logger.warning(f"Date incomplète détectée (année absente ou ambiguë) : {date_str}")
