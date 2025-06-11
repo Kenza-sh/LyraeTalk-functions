@@ -110,7 +110,7 @@ class InformationExtractor:
     def extraire_date_naissance(self, texte):
         logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
         texte=self.replace_numbers_in_string(texte)
-        textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
+        textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
         if textual_date_match:
             jour, mois_str, annee = textual_date_match.groups()
             mois_map = {
@@ -175,12 +175,8 @@ class InformationExtractor:
                     else :
                          annee_d =annee
                     logger.info(f"annee est est : {annee_d}")
-                    #matched_str = short_date_match_temp.group(0)
                     texte = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, texte)
-                    logger.info(f"Date courte détectée et partiellement normalisée : {texte}")
-                    #texte = texte.replace(matched_str, updated_str)
-                    #logger.info(f"Texte après normalization (année seulement) : {texte}")
-                    
+                    logger.info(f"Date courte détectée et partiellement normalisée : {texte}") 
                 else :
                     return texte
                 
