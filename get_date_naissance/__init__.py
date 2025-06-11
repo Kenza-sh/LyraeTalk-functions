@@ -130,7 +130,7 @@ class InformationExtractor:
             jour, mois_str, annee = textual_date_match.groups() 
             mois = self.MONTH_MAP.get(mois_str.lower())
             if mois:
-                annee = normalize_year(annee)
+                annee = self.normalize_year(annee)
                 normalized = f"{jour.zfill(2)} {mois} {annee}"
                 logger.info(f"Date textuelle détectée et normalisée 1 : {normalized}")
                 texte = texte.replace(textual_date_match.group(0), normalized)
@@ -140,7 +140,7 @@ class InformationExtractor:
             logger.info(f"short_date_match : {short_date_match}")
             if short_date_match:
                     jour, mois, annee = short_date_match.groups()
-                    annee = normalize_year(annee)
+                    annee = self.normalize_year(annee)
                     logger.info(f"annee est est : {annee}")
                     normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
                     logger.info(f"Date courte détectée et normalisée  {normalized}")
@@ -152,7 +152,7 @@ class InformationExtractor:
                 logger.info(f"short_date_match : {short_date_match_temp}")
                 if short_date_match_temp:
                     jour, mois, annee = short_date_match_temp.groups()
-                    annee = normalize_year(annee)
+                    annee = self.normalize_year(annee)
                     logger.info(f"annee est est : {annee_d}")
                     texte = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, texte)
                     logger.info(f"Date courte détectée et partiellement normalisée : {texte}") 
