@@ -189,7 +189,7 @@ class InformationExtractor:
                                     logger.info(f"Date courte détectée et partiellement normalisée : {texte}")
             
                         # Nouvelle tentative de parsing après normalisation
-                        date_obj = dateparser.parse(date_str, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
+                        date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
                         if date_obj and not self.is_future_date(date_obj):
                             formatted_date = date_obj.strftime("%Y-%m-%d")
                             logger.info(f"Date de naissance extraite : {formatted_date}")
