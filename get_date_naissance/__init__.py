@@ -175,7 +175,7 @@ class InformationExtractor:
                          annee_d =annee
                     logger.info(f"annee est est : {annee_d}")
                     matched_str = short_date_match_temp.group(0)
-                    updated_str = re.sub(r'\b' + re.escape(annee) + r'\b', annee_4d, matched_str)
+                    updated_str = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, matched_str)
                     logger.info(f"Date courte détectée et partiellement normalisée : {updated_str}")
                     texte = texte.replace(matched_str, updated_str)
                     logger.info(f"Texte après normalization (année seulement) : {texte}")
