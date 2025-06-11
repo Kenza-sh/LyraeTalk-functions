@@ -148,20 +148,8 @@ class InformationExtractor:
                             logger.warning(f"Date non valide (date dans le futur) : {la_date}")
                             return texte
                         return date_obj.strftime("%Y-%m-%d")
-            
-                # Troisième essai : via entités nommées
-                entities = self.reconstruct_entities(self.get_entities(texte))
-                for ent in entities:
-                    if ent['entity'] == "I-DATE":
-                        date_str = ent['word']
-                        logger.info(f"Entité date détectée : {date_str}")
-                        date_obj = dateparser.parse(date_str, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
-                        if date_obj and not self.is_future_date(date_obj):
-                            return date_obj.strftime("%Y-%m-%d")
-            
-                        # Tentative de normalisation si l'entité n'est pas directement parsable
-                        textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
-                        if textual_date_match:
+                 textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
+                 if textual_date_match:
                             jour, mois_str, annee = textual_date_match.groups()
                             mois = self.MONTH_MAP.get(mois_str.lower())
                             if mois:
@@ -169,7 +157,7 @@ class InformationExtractor:
                                 normalized = f"{jour.zfill(2)} {mois} {annee}"
                                 logger.info(f"Date textuelle détectée et normalisée: {normalized}")
                                 texte = texte.replace(textual_date_match.group(0), normalized)
-                        else:
+                else:
                             # Essai avec formats courts (ex: 12/08/1990)
                             short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
                             if short_date_match:
@@ -187,7 +175,19 @@ class InformationExtractor:
                                     annee_d = self.normalize_year(annee)
                                     texte = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, texte)
                                     logger.info(f"Date courte détectée et partiellement normalisée : {texte}")
-            
+                                    
+                date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
+                if date_obj:
+                        if self.is_future_date(date_obj):
+                            logger.warning(f"Date non valide (date dans le futur) : {texte}")
+                            return texte
+                        return date_obj.strftime("%Y-%m-%d")
+                # Troisième essai : via entités nommées
+                entities = self.reconstruct_entities(self.get_entities(texte))
+                for ent in entities:
+                    if ent['entity'] == "I-DATE":
+                        date_str = ent['word']
+                        logger.info(f"Entité date détectée : {date_str}")
                         # Nouvelle tentative de parsing après normalisation
                         date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
                         if date_obj and not self.is_future_date(date_obj):
