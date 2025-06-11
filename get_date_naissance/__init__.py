@@ -152,7 +152,7 @@ class InformationExtractor:
                 logger.info(f"short_date_match : {short_date_match_temp}")
                 if short_date_match_temp:
                     jour, mois, annee = short_date_match_temp.groups()
-                    annee = self.normalize_year(annee)
+                    annee_d = self.normalize_year(annee)
                     logger.info(f"annee est est : {annee_d}")
                     texte = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, texte)
                     logger.info(f"Date courte détectée et partiellement normalisée : {texte}") 
