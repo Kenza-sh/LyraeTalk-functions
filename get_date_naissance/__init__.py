@@ -15,6 +15,14 @@ logger.setLevel(logging.INFO)
 class InformationExtractor:
     def __init__(self ):
         logger.info("Modèle NER initialisé avec succès.")
+        self.NUMBER_MAP = { "premier": 1, "un": 1, "1er": 1, "deuxième": 2, "deux": 2, "2e": 2}
+        self.MONTH_MAP = {
+            "janvier": "01", "février": "02", "fevrier": "02", "mars": "03",
+            "avril": "04", "mai": "05", "juin": "06", "juillet": "07",
+            "août": "08", "aout": "08", "septembre": "09", "octobre": "10",
+            "novembre": "11", "décembre": "12", "decembre": "12"
+        }
+
         
     def get_entities(self , texte):
         data = {"inputs": texte}
@@ -85,8 +93,7 @@ class InformationExtractor:
         return entities
     
     def replace_numbers_in_string(self, sentence):
-        number_map = {"premier": 1, "un": 1, "1er": 1, "deuxième": 2, "deux": 2, "2e": 2}
-        for word, num in number_map.items():
+        for word, num in self.NUMBER_MAP.items():
             sentence = re.sub(r'\b' + re.escape(word) + r'\b', str(num), sentence)
         return sentence.lower()
 
@@ -96,84 +103,56 @@ class InformationExtractor:
         return birth_date > today or birth_date < min_date
     
     def remplacer_mois(self ,text):
-        mois_map = {
-                    "janvier": "01", "février": "02", "fevrier": "02", "mars": "03",
-                    "avril": "04", "mai": "05", "juin": "06", "juillet": "07",
-                    "août": "08", "aout": "08", "septembre": "09", "octobre": "10",
-                    "novembre": "11", "décembre": "12", "decembre": "12"
-                }
-        for mois, num in mois_map.items():
+        for mois, num in slef.MONTH_MAP.items():
             pattern = r'\b' + re.escape(mois) + r'\b'
             text = re.sub(pattern, num, text, flags=re.IGNORECASE)
         return text
+        
+    def normalize_year(self , annee) :
+            if len(annee) == 4:
+                return annee
+            current_year = datetime.now().year
+            pivot = current_year % 100
+            century = current_year - pivot
+            annee_int = int(annee)
+            if annee_int > pivot:
+                year_full = century - 100 + annee_int  # siècle précédent
+            else:
+                year_full = century + annee_int        # siècle actuel
+            logger.info(f"Année courte {annee} normalisée en {year_full}")
+            return str(year_full)   
         
     def extraire_date_naissance(self, texte):
         logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
         texte=self.replace_numbers_in_string(texte)
         textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
         if textual_date_match:
-            jour, mois_str, annee = textual_date_match.groups()
-            mois_map = {
-                "janvier": "01", "février": "02", "fevrier": "02", "mars": "03",
-                "avril": "04", "mai": "05", "juin": "06", "juillet": "07",
-                "août": "08", "aout": "08", "septembre": "09", "octobre": "10",
-                "novembre": "11", "décembre": "12", "decembre": "12"
-            }
-        
-            mois = mois_map.get(mois_str.lower())
+            jour, mois_str, annee = textual_date_match.groups() 
+            mois = self.MONTH_MAP.get(mois_str.lower())
             if mois:
-                if len(annee) == 2:
-                    current_year = datetime.now().year
-                    pivot = current_year % 100
-                    century = current_year - pivot
-                    logger.info(f"century est : {century}")
-                    annee_int = int(annee)
-                    if annee_int > pivot:
-                            annee = str(century - 100 + annee_int)  # siècle précédent
-                    else:
-                            annee = str(century + annee_int)        # siècle actuel
+                annee = normalize_year(annee)
                 normalized = f"{jour.zfill(2)} {mois} {annee}"
                 logger.info(f"Date textuelle détectée et normalisée 1 : {normalized}")
                 texte = texte.replace(textual_date_match.group(0), normalized)
-                logger.info(f"Texte après normalization 1 : {texte}")
+                logger.info(f"Texte après normalization: {texte}")
         else :
             short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
             logger.info(f"short_date_match : {short_date_match}")
             if short_date_match:
                     jour, mois, annee = short_date_match.groups()
-                    if len(annee) == 2:
-                        current_year = datetime.now().year
-                        pivot = current_year % 100
-                        century = current_year - pivot
-                        logger.info(f"century est : {century}")
-                        annee_int = int(annee)
-                        if annee_int > pivot:
-                            annee = str(century - 100 + annee_int)  # siècle précédent
-                        else:
-                            annee = str(century + annee_int)        # siècle actuel
+                    annee = normalize_year(annee)
                     logger.info(f"annee est est : {annee}")
                     normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
-                    logger.info(f"Date courte détectée et normalisée 2 : {normalized}")
+                    logger.info(f"Date courte détectée et normalisée  {normalized}")
                     texte = texte.replace(short_date_match.group(0), normalized)
-                    logger.info(f"Texte après normalization 2 : {texte}")
+                    logger.info(f"Texte après normalization : {texte}")
             else:
                 texte_temp =self.remplacer_mois(texte)
-                short_date_match_temp = re.search(r'\b(\d{1,2}).+?(\d{1,2}).+?(\d{2,4})\b', texte_temp)
+                short_date_match_temp = re.search(r'\b(\d{1,2})\D+(\d{1,2})\D+(\d{2,4})\b', texte_temp)
                 logger.info(f"short_date_match : {short_date_match_temp}")
                 if short_date_match_temp:
                     jour, mois, annee = short_date_match_temp.groups()
-                    if len(annee) == 2:
-                        current_year = datetime.now().year
-                        pivot = current_year % 100
-                        century = current_year - pivot
-                        logger.info(f"century est : {century}")
-                        annee_int = int(annee)
-                        if annee_int > pivot:
-                            annee_d = str(century - 100 + annee_int)  # siècle précédent
-                        else:
-                            annee_d = str(century + annee_int)        # siècle actuel
-                    else :
-                         annee_d =annee
+                    annee = normalize_year(annee)
                     logger.info(f"annee est est : {annee_d}")
                     texte = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, texte)
                     logger.info(f"Date courte détectée et partiellement normalisée : {texte}") 
@@ -181,17 +160,12 @@ class InformationExtractor:
                     return texte
                 
         entities = self.get_entities(texte)
-        logger.info(entities)
         entities= self.reconstruct_entities(entities)
         for ent in entities:
             if ent['entity'] == "I-DATE":
                 date_str = ent['word']
                 logger.info(f"entities a retourné : {date_str}")
-                match = re.search(r'\b((?:19|20)?\d{2})\b', date_str)
-                if not match:
-                    logger.warning(f"Date incomplète détectée (année absente ou ambiguë) : {date_str}")
-                    return f"Date incomplète : {date_str}"
-                date_obj = dateparser.parse(date_str, settings={'DATE_ORDER': 'DMY'})
+                date_obj = dateparser.parse(date_str, settings={'DATE_ORDER': 'DMY'},languages=['fr'])
                 if date_obj:
                     formatted_date = date_obj.strftime("%Y-%m-%d")
                     logger.info(f"Date de naissance extraite : {formatted_date}")
