@@ -113,7 +113,10 @@ class InformationExtractor:
         texte =self.remplacer_mois(texte)
         short_date_match = re.search(r'\b(\d{1,2}).+?(\d{1,2}).+?(\d{2,4})\b', texte)
         logger.info(f"short_date_match : {short_date_match}")
-        if short_date_match:
+        if not short_date_match:
+             logger.warning(f"Date incomplète détectée (année absente ou ambiguë) : {texte}")
+             return texte
+        else :
                 jour, mois, annee = short_date_match.groups()
                 if len(annee) == 2:
                     current_year = datetime.now().year
