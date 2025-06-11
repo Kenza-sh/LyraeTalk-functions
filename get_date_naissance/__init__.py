@@ -88,12 +88,24 @@ class InformationExtractor:
         number_map = {"premier": 1, "un": 1, "1er": 1, "deuxième": 2, "deux": 2, "2e": 2}
         for word, num in number_map.items():
             sentence = re.sub(r'\b' + re.escape(word) + r'\b', str(num), sentence)
-        return sentence
+        return sentence.lower()
 
     def is_future_date(self, birth_date):
         today = datetime.today()
         min_date = datetime(1900, 1, 1)
         return birth_date > today or birth_date < min_date
+    
+    def remplacer_mois(self ,text):
+        mois_map = {
+                    "janvier": "01", "février": "02", "fevrier": "02", "mars": "03",
+                    "avril": "04", "mai": "05", "juin": "06", "juillet": "07",
+                    "août": "08", "aout": "08", "septembre": "09", "octobre": "10",
+                    "novembre": "11", "décembre": "12", "decembre": "12"
+                }
+        for mois, num in mois_map.items():
+            pattern = r'\b' + re.escape(mois) + r'\b'
+            text = re.sub(pattern, num, text, flags=re.IGNORECASE)
+        return text
         
     def extraire_date_naissance(self, texte):
         logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
@@ -123,10 +135,13 @@ class InformationExtractor:
                 logger.info(f"Date textuelle détectée et normalisée 1 : {normalized}")
                 texte = texte.replace(textual_date_match.group(0), normalized)
                 logger.info(f"Texte après normalization 1 : {texte}")
-        else :        
+        else :
+            texte =self.remplacer_mois(texte)
             short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
             logger.info(f"short_date_match : {short_date_match}")
-            if short_date_match:
+            if not short_date_match:
+                return texte
+            else:
                 jour, mois, annee = short_date_match.groups()
                 if len(annee) == 2:
                     current_year = datetime.now().year
@@ -143,7 +158,7 @@ class InformationExtractor:
                 logger.info(f"Date courte détectée et normalisée 2 : {normalized}")
                 texte = texte.replace(short_date_match.group(0), normalized)
                 logger.info(f"Texte après normalization 2 : {texte}")
-                
+              
         entities = self.get_entities(texte)
         logger.info(entities)
         entities= self.reconstruct_entities(entities)
