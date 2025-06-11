@@ -120,8 +120,9 @@ class InformationExtractor:
                     else:
                         annee = str(current_century * 100 + annee_int)
                 normalized = f"{jour.zfill(2)} {mois} {annee}"
-                logger.info(f"Date textuelle détectée et normalisée : {normalized}")
-                texte = texte.replace(textual_date_match.group(0), normalized)
+                logger.info(f"Date textuelle détectée et normalisée 1 : {normalized}")
+                texte = texte.replace(textual_date_match.group(0), normalized
+                logger.info(f"Texte après normalization 1 : {normalized}")
         else :        
             short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
             logger.info(f"short_date_match : {short_date_match}")
@@ -139,8 +140,9 @@ class InformationExtractor:
                         annee = str(century + annee_int)        # siècle actuel
                 logger.info(f"annee est est : {annee}")
                 normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
-                logger.info(f"Date courte détectée et normalisée : {normalized}")
+                logger.info(f"Date courte détectée et normalisée 2 : {normalized}")
                 texte = texte.replace(short_date_match.group(0), normalized)
+                logger.info(f"Texte après normalization 1 : {normalized}")
                 
         entities = self.get_entities(texte)
         logger.info(entities)
