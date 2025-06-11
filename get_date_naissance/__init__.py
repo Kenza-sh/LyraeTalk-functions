@@ -110,38 +110,12 @@ class InformationExtractor:
     def extraire_date_naissance(self, texte):
         logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
         texte=self.replace_numbers_in_string(texte)
-        textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
-        if textual_date_match:
-            jour, mois_str, annee = textual_date_match.groups()
-            mois_map = {
-                "janvier": "01", "février": "02", "fevrier": "02", "mars": "03",
-                "avril": "04", "mai": "05", "juin": "06", "juillet": "07",
-                "août": "08", "aout": "08", "septembre": "09", "octobre": "10",
-                "novembre": "11", "décembre": "12", "decembre": "12"
-            }
-        
-            mois = mois_map.get(mois_str.lower())
-            if mois:
-                if len(annee) == 2:
-                    current_year = datetime.now().year
-                    current_century = current_year // 100
-                    pivot = (current_year % 100) + 10
-                    annee_int = int(annee)
-                    if annee_int > pivot:
-                        annee = str((current_century - 1) * 100 + annee_int)
-                    else:
-                        annee = str(current_century * 100 + annee_int)
-                normalized = f"{jour.zfill(2)} {mois} {annee}"
-                logger.info(f"Date textuelle détectée et normalisée 1 : {normalized}")
-                texte = texte.replace(textual_date_match.group(0), normalized)
-                logger.info(f"Texte après normalization 1 : {texte}")
-        else :
-            texte =self.remplacer_mois(texte)
-            short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
-            logger.info(f"short_date_match : {short_date_match}")
-            if not short_date_match:
+        texte =self.remplacer_mois(texte)
+        short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
+        logger.info(f"short_date_match : {short_date_match}")
+        if not short_date_match:
                 return texte
-            else:
+        else:
                 jour, mois, annee = short_date_match.groups()
                 if len(annee) == 2:
                     current_year = datetime.now().year
