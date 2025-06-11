@@ -158,7 +158,7 @@ class InformationExtractor:
                     logger.info(f"Texte après normalization 2 : {texte}")
             else:
                 texte_temp =self.remplacer_mois(texte)
-                short_date_match_temp = re.search(r'\b(\d{1,2}).+?(\d{1,2}).+?(\d{2,4})\b', texte_temp)
+                short_date_match_temp = re.search(r'\b(\d{1,2})\D*(\d{1,2})\D*(\d{2,4})\b', texte_temp)
                 logger.info(f"short_date_match : {short_date_match_temp}")
                 if short_date_match_temp:
                     jour, mois, annee = short_date_match_temp.groups()
