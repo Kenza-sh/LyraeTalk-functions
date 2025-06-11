@@ -15,7 +15,7 @@ class InformationExtractor:
     def __init__(self ):
         logger.info("Modèle NER initialisé avec succès.")
         self.NUMBER_MAP = { "premier": 1, "un": 1, "1er": 1, "deuxième": 2, "deux": 2, "2e": 2}  
-        self.MONTH_MAP = {Add commentMore actions
+        self.MONTH_MAP = {
             "janvier": "01", "février": "02", "fevrier": "02", "mars": "03",
             "avril": "04", "mai": "05", "juin": "06", "juillet": "07",
             "août": "08", "aout": "08", "septembre": "09", "octobre": "10",
