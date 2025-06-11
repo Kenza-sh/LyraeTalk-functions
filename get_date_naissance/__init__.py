@@ -124,19 +124,20 @@ class InformationExtractor:
             if mois:
                 if len(annee) == 2:
                     current_year = datetime.now().year
-                    current_century = current_year // 100
-                    pivot = (current_year % 100) + 10
+                    pivot = current_year % 100
+                    century = current_year - pivot
+                    logger.info(f"century est : {century}")
                     annee_int = int(annee)
                     if annee_int > pivot:
-                        annee = str((current_century - 1) * 100 + annee_int)
+                            annee = str(century - 100 + annee_int)  # siècle précédent
                     else:
-                        annee = str(current_century * 100 + annee_int)
+                            annee = str(century + annee_int)        # siècle actuel
                 normalized = f"{jour.zfill(2)} {mois} {annee}"
                 logger.info(f"Date textuelle détectée et normalisée 1 : {normalized}")
                 texte = texte.replace(textual_date_match.group(0), normalized)
                 logger.info(f"Texte après normalization 1 : {texte}")
         else :
-            short_date_match = re.search(r'\b(\d{1,2}).+?(\d{1,2}).+?(\d{2,4})\b', texte)
+            short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
             logger.info(f"short_date_match : {short_date_match}")
             if short_date_match:
                     jour, mois, annee = short_date_match.groups()
@@ -174,11 +175,11 @@ class InformationExtractor:
                     else :
                          annee_d =annee
                     logger.info(f"annee est est : {annee_d}")
-                    matched_str = short_date_match_temp.group(0)
-                    updated_str = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, matched_str)
-                    logger.info(f"Date courte détectée et partiellement normalisée : {updated_str}")
-                    texte = texte.replace(matched_str, updated_str)
-                    logger.info(f"Texte après normalization (année seulement) : {texte}")
+                    #matched_str = short_date_match_temp.group(0)
+                    texte = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, texte)
+                    logger.info(f"Date courte détectée et partiellement normalisée : {texte}")
+                    #texte = texte.replace(matched_str, updated_str)
+                    #logger.info(f"Texte après normalization (année seulement) : {texte}")
                     
                 else :
                     return texte
