@@ -122,14 +122,12 @@ class InformationExtractor:
     def extraire_date_naissance(self, texte):
             logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
             texte = self.replace_numbers_in_string(texte)
-        
-            # Premier essai avec dateparser
             date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'})
-            if date_obj and not self.is_future_date(date_obj):
-                return date_obj.strftime("%Y-%m-%d")
-            elif date_obj:
-                logger.warning(f"Date non valide (date dans le futur) : {texte}")
-                return texte
+            if date_obj :
+                if self.is_future_date(date_obj):
+                     return texte
+                else :
+                     return date_obj.strftime("%Y-%m-%d")
         
             # Deuxième essai : regex avec mois textuels
             jour_pattern = r"(\d{1,2})"
@@ -143,11 +141,11 @@ class InformationExtractor:
                 jour, mois, annee = match.group(1), match.group(2), match.group(3)
                 la_date = f"{jour} {mois} {annee}"
                 date_obj = dateparser.parse(la_date, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
-                if date_obj and not self.is_future_date(date_obj):
-                    return date_obj.strftime("%Y-%m-%d")
-                elif date_obj:
-                    logger.warning(f"Date non valide (date dans le futur) : {la_date}")
-                    return texte
+                if date_obj :
+                    if self.is_future_date(date_obj):
+                         return texte
+                    else :
+                         return date_obj.strftime("%Y-%m-%d")
         
             # Troisième essai : date textuelle type "1er janvier 2000"
             textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
@@ -159,7 +157,12 @@ class InformationExtractor:
                     normalized = f"{jour.zfill(2)} {mois} {annee}"
                     logger.info(f"Date textuelle détectée et normalisée: {normalized}")
                     texte = texte.replace(textual_date_match.group(0), normalized)
-        
+                    date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
+                    if date_obj :
+                        if self.is_future_date(date_obj):
+                             return texte
+                        else :
+                             return date_obj.strftime("%Y-%m-%d")
             # Quatrième essai : formats courts (12/08/1990)
             short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
             if short_date_match:
@@ -168,6 +171,12 @@ class InformationExtractor:
                 normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
                 texte = texte.replace(short_date_match.group(0), normalized)
                 logger.info(f"Date courte détectée et normalisée : {normalized}")
+                date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
+                if date_obj :
+                    if self.is_future_date(date_obj):
+                         return texte
+                    else :
+                         return date_obj.strftime("%Y-%m-%d")
             else:
                 # Dernier recours : remplacement manuel des mois
                 texte_temp = self.remplacer_mois(texte)
@@ -177,14 +186,12 @@ class InformationExtractor:
                     annee_d = self.normalize_year(annee)
                     texte = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, texte)
                     logger.info(f"Date courte détectée et partiellement normalisée : {texte}")
-        
-            # Tentative finale avec dateparser
-            date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
-            if date_obj and not self.is_future_date(date_obj):
-                return date_obj.strftime("%Y-%m-%d")
-            elif date_obj:
-                logger.warning(f"Date non valide (date dans le futur) : {texte}")
-                return texte
+                    date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
+                    if date_obj :
+                        if self.is_future_date(date_obj):
+                             return texte
+                        else :
+                             return date_obj.strftime("%Y-%m-%d")
         
             # Dernière tentative avec entités nommées
             entities = self.reconstruct_entities(self.get_entities(texte))
@@ -193,13 +200,11 @@ class InformationExtractor:
                     date_str = ent['word']
                     logger.info(f"Entité date détectée : {date_str}")
                     date_obj = dateparser.parse(date_str, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
-                    if date_obj and not self.is_future_date(date_obj):
-                        formatted_date = date_obj.strftime("%Y-%m-%d")
-                        logger.info(f"Date de naissance extraite : {formatted_date}")
-                        return formatted_date
-                    else:
-                        logger.warning(f"Date non valide extraite : {date_str}")
-                        return texte
+                    if date_obj :
+                        if self.is_future_date(date_obj):
+                             return texte
+                        else :
+                             return date_obj.strftime("%Y-%m-%d")
         
             logger.warning("Aucune date de naissance n'a été extraite.")
             return None
