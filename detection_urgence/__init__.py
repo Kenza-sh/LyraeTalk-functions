@@ -86,7 +86,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         type_exam_id = req_body.get('type_exam_id')
         query = req_body.get('text')
 
-        if not all([type_exam_id,text]):
+        if not all([type_exam_id,query]):
             return func.HttpResponse(
                 json.dumps({"error": "Missing one or more required fields: type_exam_id, text"}),
                 mimetype="application/json",
