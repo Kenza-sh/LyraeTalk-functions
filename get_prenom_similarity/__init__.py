@@ -14,18 +14,6 @@ def normalize_text(text):
     nfkd = unicodedata.normalize('NFKD', text.lower())
     return ''.join([c for c in nfkd if not unicodedata.combining(c)])
 
-from rapidfuzz import fuzz, process
-import jellyfish
-import logging
-import unicodedata
-
-logger = logging.getLogger(__name__)
-
-def normalize_text(text):
-    """Normalise le texte pour la comparaison : minuscules et suppression accents"""
-    nfkd = unicodedata.normalize('NFKD', text.lower())
-    return ''.join([c for c in nfkd if not unicodedata.combining(c)])
-
 class NameMatcher:
     def __init__(self):
         pass  # Plus rien à faire au constructeur
