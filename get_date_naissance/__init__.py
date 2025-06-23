@@ -12,16 +12,71 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 class InformationExtractor:
-    def __init__(self ):
-        logger.info("Modèle NER initialisé avec succès.")
-        self.NUMBER_MAP = { "premier": 1, "un": 1, "1er": 1, "deuxième": 2, "deux": 2, "2e": 2}  
-        self.MONTH_MAP = {
+  def __init__(self ):
+     self.jour_pattern = r"(\d{1,2})"
+     self.mois_pattern = r"(janvier|février|mars|avril|mai|juin|juillet|août|" \
+                           r"septembre|octobre|novembre|décembre|" \
+                           r"janv\.?|févr\.?|avr\.?|juil\.?|sept\.?|oct\.?|nov\.?|déc\.?)"
+     self.annee_pattern = r"(\d{2,4})"
+     self.date_pattern = re.compile(rf"\b{self.jour_pattern}\b.*?{self.mois_pattern}\b.*?{self.annee_pattern}",re.IGNORECASE)
+     self.MIN_DATE = datetime(1900, 1, 1)
+     self.NUMBER_MAP = { "premier": 1, "un": 1, "1er": 1}
+     self.MONTH_MAP = {
             "janvier": "01", "février": "02", "fevrier": "02", "mars": "03",
             "avril": "04", "mai": "05", "juin": "06", "juillet": "07",
             "août": "08", "aout": "08", "septembre": "09", "octobre": "10",
             "novembre": "11", "décembre": "12", "decembre": "12"
         }
-    def get_entities(self , texte):
+
+
+  def normalize_text(self, text) -> str:
+      if not isinstance(text, str):
+          return ""
+      text = text.lower()
+      # Remplace les mots français représentant des nombres
+      for word, num in self.NUMBER_MAP.items():
+          text = re.sub(r'\b' + re.escape(word) + r'\b', str(num), text)
+      # Supprime la ponctuation
+      text = re.sub(r"[.,;:!?*#@'\"<>\[\](){}]+", " ", text)
+      # Supprime les espaces multiples
+      text = re.sub(r"\s+", " ", text).strip()
+      return text
+
+  def parse_date(self, text):
+        dt = dateparser.parse(text, settings={'DATE_ORDER': 'DMY','PREFER_DATES_FROM': 'past','REQUIRE_PARTS': ['day', 'month', 'year']}, languages=['fr'])
+        if not dt:
+            return None
+        if not (self.MIN_DATE <= dt <= datetime.today()):
+            logger.warning(f"Date hors intervalle valide: {dt}")
+            return None
+        return dt
+
+  def normalize_year(self ,year_str) -> str:
+          year_str = year_str.zfill(2)
+          if len(year_str) == 2:
+              current_year = datetime.now().year
+              pivot = current_year % 100
+              century = current_year - pivot
+              y = int(year_str)
+              full = (century + y) if y <= pivot else (century - 100 + y)
+              logger.debug(f"Normalized two-digit year {year_str} -> {full}")
+              return str(full)
+          return year_str
+
+  def split_date_by_length(self, digits):
+        l = len(digits)
+        if l == 8:
+            return digits[:2], digits[2:4], digits[4:]
+        elif l == 7:
+            return '0' + digits[0], digits[1:3], digits[3:]
+        elif l == 6:
+            return digits[:2], digits[2:4], digits[4:]
+        elif l == 5:
+            return '0' + digits[0], digits[1:3], digits[3:]
+        else:
+            return None, None, None  # Trop court ou trop long
+
+  def get_entities(self , texte):
         data = {"inputs": texte}
         body = str.encode(json.dumps(data))
         url = os.environ["HG_MODEL_ENDPOINT"]
@@ -43,8 +98,8 @@ class InformationExtractor:
             print(error.info())
             print(error.read().decode("utf8", 'ignore'))
             return []
-            
-    def reconstruct_entities(self, ner_output):
+
+  def reconstruct_entities(self, ner_output):
         entities = []
         current_entity = {
             "entity": None,
@@ -53,7 +108,7 @@ class InformationExtractor:
             "end": None,
             "word": ""
         }
-    
+
         for token in ner_output:
             if current_entity["entity"] != token["entity"]:
                 if current_entity["entity"]:
@@ -76,7 +131,7 @@ class InformationExtractor:
                 current_entity["score"].append(token["score"])
                 current_entity["end"] = token["end"]
                 current_entity["word"] += token["word"]
-    
+
         # Add last entity
         if current_entity["entity"]:
             entities.append({
@@ -86,167 +141,79 @@ class InformationExtractor:
                 "start": current_entity["start"],
                 "end": current_entity["end"]
             })
-    
+
         return entities
-    
-    def replace_numbers_in_string(self, sentence):
-        for word, num in self.NUMBER_MAP.items():
-            sentence = re.sub(r'\b' + re.escape(word) + r'\b', str(num), sentence)
-        return sentence.lower()
-        
-    def remplacer_mois(self ,text):
-        for mois, num in self.MONTH_MAP.items():
-            pattern = r'\b' + re.escape(mois) + r'\b'
-            text = re.sub(pattern, num, text, flags=re.IGNORECASE)
-        return text
-        
-    def normalize_year(self , annee) :
-            if len(annee) == 4:
-                return annee
-            current_year = datetime.now().year
-            pivot = current_year % 100
-            century = current_year - pivot
-            annee_int = int(annee)
-            if annee_int > pivot:
-                year_full = century - 100 + annee_int  # siècle précédent
-            else:
-                year_full = century + annee_int        # siècle actuel
-            logger.info(f"Année courte {annee} normalisée en {year_full}")
-            return str(year_full)   
-        
-    def is_future_date(self, birth_date):
-        today = datetime.today()
-        min_date = datetime(1900, 1, 1)
-        return birth_date > today or birth_date < min_date
-        
-    def split_date_by_length(self, digits):
-        l = len(digits)
-        if l == 8:
-            return digits[:2], digits[2:4], digits[4:]
-        elif l == 7:
-            return '0' + digits[0], digits[1:3], digits[3:]
-        elif l == 6:
-            return digits[:2], digits[2:4], digits[4:]
-        elif l == 5:
-            return '0' + digits[0], digits[1:3], digits[3:]
-        else:
-            return None, None, None  # Trop court ou trop long
 
-    def detect_and_normalize_dates(self, texte):
-        matches = re.findall(r'\b[\d ]{5,10}\b', texte)
-        for match in matches:
-            digits = re.sub(r'\D', '', match)  # Supprime espaces, tirets, etc.
-            if 5 <= len(digits) <= 8:
-                jour, mois, annee = self.split_date_by_length(digits)
-                if not all([jour, mois, annee]):
-                    continue
-                jour = jour.zfill(2)
-                mois = mois.zfill(2)
-                annee = str(self.normalize_year(annee))
-
-                try:
-                    date_obj = datetime.strptime(f"{jour}/{mois}/{annee}", "%d/%m/%Y")
-                    if self.is_future_date(date_obj):
-                        return texte
-                    else:
-                        # Remplacer la date brute dans le texte
-                        texte = texte.replace(match, date_obj.strftime("%Y-%m-%d"))
-                        return texte
-                except ValueError:
-                    continue  # Format invalide, on essaie le prochain match
-        return texte
-
-    def extraire_date_naissance(self, texte):
-            logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
-            texte = self.replace_numbers_in_string(texte)
-            texte = re.sub(r"[.,;:!?*#@\"'<>{}\[\]()]+", '', texte)
-            texte = self.detect_and_normalize_dates(texte)
-            # Troisième essai : date textuelle type "1er janvier 2000"
-            textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
-            if textual_date_match:
-                jour, mois_str, annee = textual_date_match.groups()
+  def extraire_date_naissance(self, texte):
+       texte =self.normalize_text(texte)
+       if (pattern_1 := re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)):
+                jour, mois_str, annee = pattern_1.groups()
                 mois = self.MONTH_MAP.get(mois_str.lower())
                 if mois:
-                    annee = self.normalize_year(annee)
                     normalized = f"{jour.zfill(2)} {mois} {annee}"
-                    logger.info(f"Date textuelle détectée et normalisée: {normalized}")
-                    texte = texte.replace(textual_date_match.group(0), normalized)
-                    date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
-                    if date_obj :
-                        if self.is_future_date(date_obj):
-                             return texte
-                        else :
-                             return date_obj.strftime("%Y-%m-%d")
-            # Quatrième essai : formats courts (12/08/1990)
-            short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
-            if short_date_match:
-                jour, mois, annee = short_date_match.groups()
-                annee = self.normalize_year(annee)
+                    logger.info(f"PATTERN_1: {normalized}")
+                    dt = self.parse_date(normalized)
+                    if dt:
+                            return dt.strftime("%Y-%m-%d")
+       elif (pattern_2 := re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte, re.IGNORECASE)):
+                jour, mois, annee = pattern_2.groups()
                 normalized = f"{jour.zfill(2)} {mois.zfill(2)} {annee}"
-                texte = texte.replace(short_date_match.group(0), normalized)
-                logger.info(f"Date courte détectée et normalisée : {normalized}")
-                date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
-                if date_obj :
-                    if self.is_future_date(date_obj):
-                         return texte
-                    else :
-                         return date_obj.strftime("%Y-%m-%d")
-            else:
-                # Dernier recours : remplacement manuel des mois
-                texte_temp = self.remplacer_mois(texte)
-                short_date_match_temp = re.search(r'\b(\d{1,2})\D+(\d{1,2})\D+(\d{2,4})\b', texte_temp)
-                if short_date_match_temp:
-                    jour, mois, annee = short_date_match_temp.groups()
-                    annee_d = self.normalize_year(annee)
-                    texte = re.sub(r'\b' + re.escape(annee) + r'\b', annee_d, texte)
-                    logger.info(f"Date courte détectée et partiellement normalisée : {texte}")
-                    date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
-                    if date_obj :
-                        if self.is_future_date(date_obj):
-                             return texte
-                        else :
-                             return date_obj.strftime("%Y-%m-%d")
-                            
-            date_obj = dateparser.parse(texte, settings={'DATE_ORDER': 'DMY'})
-            if date_obj :
-                if self.is_future_date(date_obj):
-                     return texte
-                else :
-                     return date_obj.strftime("%Y-%m-%d")
-        
-            # Deuxième essai : regex avec mois textuels
-            jour_pattern = r"(\d{1,2})"
-            mois_pattern = r"(janvier|février|mars|avril|mai|juin|juillet|août|" \
-                           r"septembre|octobre|novembre|décembre|" \
-                           r"janv\.?|févr\.?|avr\.?|juil\.?|sept\.?|oct\.?|nov\.?|déc\.?)"
-            annee_pattern = r"(\d{4})"
-            full_pattern = re.compile(rf"\b{jour_pattern}\s+{mois_pattern}\b.*?{annee_pattern}", re.IGNORECASE)
-            match = full_pattern.search(texte)
-            if match:
-                jour, mois, annee = match.group(1), match.group(2), match.group(3)
-                la_date = f"{jour} {mois} {annee}"
-                date_obj = dateparser.parse(la_date, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
-                if date_obj :
-                    if self.is_future_date(date_obj):
-                         return texte
-                    else :
-                         return date_obj.strftime("%Y-%m-%d")
-        
-            # Dernière tentative avec entités nommées
-            entities = self.reconstruct_entities(self.get_entities(texte))
-            for ent in entities:
-                if ent['entity'] == "I-DATE":
-                    date_str = ent['word']
-                    logger.info(f"Entité date détectée : {date_str}")
-                    date_obj = dateparser.parse(date_str, settings={'DATE_ORDER': 'DMY'}, languages=['fr'])
-                    if date_obj :
-                        if self.is_future_date(date_obj):
-                             return texte
-                        else :
-                             return date_obj.strftime("%Y-%m-%d")
-        
-            logger.warning("Aucune date de naissance n'a été extraite.")
-            return None
+                logger.info(f"PATTERN_2: {normalized}")
+                dt = self.parse_date(normalized)
+                if dt:
+                        return dt.strftime("%Y-%m-%d")
+
+       elif  (pattern_3 := self.date_pattern.search(texte)):
+                jour, mois, annee = pattern_3.group(1), pattern_3.group(2), pattern_3.group(3)
+                normalized = f"{jour} {mois} {annee}"
+                logger.info(f"PATTERN_3: {normalized}")
+                dt = self.parse_date(normalized)
+                if dt:
+                        return dt.strftime("%Y-%m-%d")
+
+       elif (pattern_4 := re.search(r"""\b(?P<mois>[a-zA-Zéèêëàâäîïôöûüç\.-]+)(?:[\s\./,\-]*\w+)*?[\s\./,\-]*(?P<jour>\d{1,2})(?:er)?(?:[\s\./,\-]*\w+)*?[\s\./,\-]*(?P<annee>\d{2,4})\b""", texte, re.IGNORECASE)):
+                  jour = pattern_4.group("jour")
+                  mois = pattern_4.group("mois")
+                  annee = pattern_4.group("annee")
+                  normalized=f"{jour}/{mois}/{annee}"
+                  logger.info(f"PATTERN_4: {normalized}")
+                  dt = self.parse_date(normalized)
+                  if dt:
+                        return dt.strftime("%Y-%m-%d")
+
+       elif  (matches := re.findall(r'\b[\d ]{5,10}\b', texte)):
+            for match in matches:
+                digits = re.sub(r'\D', '', match)  # Supprime espaces, tirets, etc.
+                if 5 <= len(digits) <= 8:
+                    jour, mois, annee = self.split_date_by_length(digits)
+                    if not all([jour, mois, annee]):
+                        continue
+                    jour = jour.zfill(2)
+                    mois = mois.zfill(2)
+                    annee = str(self.normalize_year(annee))
+                    normalized=f"{jour}/{mois}/{annee}"
+                    logger.info(f"PATTERN_5: {normalized}")
+                    dt = self.parse_date(normalized)
+                    if dt:
+                        return dt.strftime("%Y-%m-%d")
+
+       elif  (dt := self.parse_date(texte)):
+              logger.info(f"PATTERN_6: {dt}")
+              return dt.strftime("%Y-%m-%d")
+
+       elif (entities := self.reconstruct_entities(self.get_entities(texte))):
+          date_parts = [ent['word'] for ent in entities if ent['entity'] == "I-DATE"]
+          if date_parts:
+              date_str = " ".join(date_parts)
+              logger.info(f"PATTERN_7 : Date détectée à partir des entités : {date_str}")
+              dt = self.parse_date(f"{jour}/{mois}/{annee}")
+              if dt:
+                  return dt.strftime("%Y-%m-%d")
+
+       else :
+           logger.info(f"AUCUNE DATE EXTRAITE : {texte}")
+           return None
+
 
             
 extractor = InformationExtractor()
