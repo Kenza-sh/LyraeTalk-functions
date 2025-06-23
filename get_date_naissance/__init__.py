@@ -122,6 +122,7 @@ class InformationExtractor:
     def extraire_date_naissance(self, texte):
             logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
             texte = self.replace_numbers_in_string(texte)
+            texte = re.sub(r"[.,;:!?*#@\"'<>{}\[\]()]+", '', texte)
             # Troisième essai : date textuelle type "1er janvier 2000"
             textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
             if textual_date_match:
