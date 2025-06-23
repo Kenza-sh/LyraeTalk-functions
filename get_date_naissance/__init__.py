@@ -119,10 +119,48 @@ class InformationExtractor:
         min_date = datetime(1900, 1, 1)
         return birth_date > today or birth_date < min_date
         
+    def split_date_by_length(self, digits):
+        l = len(digits)
+        if l == 8:
+            return digits[:2], digits[2:4], digits[4:]
+        elif l == 7:
+            return '0' + digits[0], digits[1:3], digits[3:]
+        elif l == 6:
+            return digits[:2], digits[2:4], digits[4:]
+        elif l == 5:
+            return '0' + digits[0], digits[1:3], digits[3:]
+        else:
+            return None, None, None  # Trop court ou trop long
+
+    def detect_and_normalize_dates(self, texte):
+        matches = re.findall(r'\b[\d ]{5,10}\b', texte)
+        for match in matches:
+            digits = re.sub(r'\D', '', match)  # Supprime espaces, tirets, etc.
+            if 5 <= len(digits) <= 8:
+                jour, mois, annee = self.split_date_by_length(digits)
+                if not all([jour, mois, annee]):
+                    continue
+                jour = jour.zfill(2)
+                mois = mois.zfill(2)
+                annee = str(self.normalize_year(annee))
+
+                try:
+                    date_obj = datetime.strptime(f"{jour}/{mois}/{annee}", "%d/%m/%Y")
+                    if self.is_future_date(date_obj):
+                        return texte
+                    else:
+                        # Remplacer la date brute dans le texte
+                        texte = texte.replace(match, date_obj.strftime("%Y-%m-%d"))
+                        return texte
+                except ValueError:
+                    continue  # Format invalide, on essaie le prochain match
+        return texte
+
     def extraire_date_naissance(self, texte):
             logger.info(f"Extraction de la date de naissance à partir du texte : {texte}")
             texte = self.replace_numbers_in_string(texte)
             texte = re.sub(r"[.,;:!?*#@\"'<>{}\[\]()]+", '', texte)
+            texte = self.detect_and_normalize_dates(texte)
             # Troisième essai : date textuelle type "1er janvier 2000"
             textual_date_match = re.search(r'\b(\d{1,2})(?:er)?\s+([a-zéûî\.-]+)\s+(\d{2,4})\b', texte, re.IGNORECASE)
             if textual_date_match:
@@ -140,7 +178,7 @@ class InformationExtractor:
                         else :
                              return date_obj.strftime("%Y-%m-%d")
             # Quatrième essai : formats courts (12/08/1990)
-            short_date_match = re.search(r'\b(\d{1,2})[ /.-]*?(\d{1,2})[ /.-]*?(\d{2,4})\b', texte)
+            short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
             if short_date_match:
                 jour, mois, annee = short_date_match.groups()
                 annee = self.normalize_year(annee)
