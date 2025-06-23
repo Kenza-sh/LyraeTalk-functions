@@ -83,16 +83,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         req_body = req.get_json()
+        type_exam_id = req_body.get('type_exam_id')
         query = req_body.get('text')
 
-        if not query:
+        if not all([type_exam_id,text]):
             return func.HttpResponse(
-                json.dumps({"error": "No query provided in request body"}),
+                json.dumps({"error": "Missing one or more required fields: type_exam_id, text"}),
                 mimetype="application/json",
                 status_code=400
             )
 
-        result = is_urgence(query)
+        result = is_urgence(type_exam_id  ,query)
 
         return func.HttpResponse(
             json.dumps({"response": result}),
