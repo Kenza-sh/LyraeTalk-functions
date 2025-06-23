@@ -110,11 +110,15 @@ IMMEDIATE_POSITIVE = {
     }
 }
 
-
+def contains_suspicious_terms(text: str) -> bool:
+    pattern = r"\b(injection|tumeu?r(?:e|es)?|masse?s?|kystes?|néoplasies?|adénopathies?|ganglions?|produits?\s+de\s+contraste|tuméfactions?)\b"
+    return re.search(pattern, text, re.IGNORECASE | re.UNICODE) is not None
+    
 def is_injection(type_exam_id: str, code_exam_id: str, phrase: str) -> bool:
     if type_exam_id != 'CT':
         return False
-
+    if contains_suspicious_terms(phrase) :
+         return True
     if code_exam_id in IMMEDIATE_POSITIVE['CT']['always_true']:
         return True
 
