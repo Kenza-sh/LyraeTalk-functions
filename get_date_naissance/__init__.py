@@ -140,7 +140,7 @@ class InformationExtractor:
                         else :
                              return date_obj.strftime("%Y-%m-%d")
             # Quatrième essai : formats courts (12/08/1990)
-            short_date_match = re.search(r'\b(\d{1,2})[ /.-](\d{1,2})[ /.-](\d{2,4})\b', texte)
+            short_date_match = re.search(r'\b(\d{1,2})[ /.-]*?(\d{1,2})[ /.-]*?(\d{2,4})\b', texte)
             if short_date_match:
                 jour, mois, annee = short_date_match.groups()
                 annee = self.normalize_year(annee)
