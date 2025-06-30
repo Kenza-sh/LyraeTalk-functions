@@ -196,6 +196,29 @@ class ExamenFetcher:
     def equiv(self, a, b):
          return self.normalize_to_compare(a) == self.normalize_to_compare(b)
                 
+    def query_correction(self, text):
+        custom_prompt_template = (
+            """Vous êtes un correcteur orthographique spécialisé en imagerie médicale et gestion de rendez-vous.  
+• En vous basant sur la phrase du patient, corrigez les erreurs issues de la mauvaise transcription vocale (speech-to-text), telles que les confusions phonétiques ou les homophones mal interprétés.  
+• Restez strictement dans le domaine de l’imagerie médicale (radiographie, scanner, angioscanner, coroscanner, IRM, échographie, mammographie, etc.) et de la prise de rendez-vous.  
+Vous devez répondre **uniquement** par la phrase corrigée, **sans** ajouter d’explication ni de commentaire.
+"""
+        )
+        try:
+            completion = client.chat.completions.create(
+                model=self.llm_model,
+                temperature=0.3,
+                messages=[
+                    {"role": "system", "content": custom_prompt_template},
+                    {"role": "user", "content": text}
+                ],
+            )
+            logging.info(f"Correction de la requete patient : {completion.choices[0].message.content}")
+            return (completion.choices[0].message.content).strip()
+        except Exception as e:
+            logging.error(f"Error answering query: {e}")
+            return ''      
+                    
     def lyae_talk_exam(self, texte):
       exam_types = {
           "RADIO": "RX",
@@ -205,6 +228,7 @@ class ExamenFetcher:
           "MAMMOGRAPHIE": "MG",
           'AUTRE' :None
       }
+      texte = self.query_correction(texte)
       texte=self.process_text(texte)
       type_exam = self.get_type_examen(texte)
       id = exam_types.get(type_exam)
@@ -224,6 +248,7 @@ class ExamenFetcher:
                   code_exam_id = "N01MGBIL"
       logging.info(f"Résultat final: Type {type_exam}, ID {id}, Code Examen {code_exam}, Exam Code {code_exam_id}")
       return type_exam,id, code_exam , code_exam_id
+
 
 fetcher = ExamenFetcher()
 
