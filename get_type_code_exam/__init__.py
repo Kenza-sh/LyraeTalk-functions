@@ -172,6 +172,7 @@ class ExamenFetcher:
     def get_class(self, text, data):
         custom_prompt_template = (
             f"Voici la liste des examens médicaux proposés par notre centre d'imagerie médicale : {', '.join(data.values())}. \n"
+            f"Corrige les erreurs de cette phrase issues de la mauvaise transcription vocale (speech-to-text), telles que les confusions phonétiques ou les homophones mal interprétés. "
             f"Analyse la phrase suivante exprimée par un patient et identifie l'examen le plus adapté à son besoin. "
             f"Répondez uniquement par le 'nom exact et complet' de l'examen correspondant , tel qu'il figure dans la liste ci-dessus."
             f"Si aucun ne convient répondre par 'None' "
@@ -197,8 +198,10 @@ class ExamenFetcher:
          return self.normalize_to_compare(a) == self.normalize_to_compare(b)
                 
     def query_correction(self, text):
-        custom_prompt_template = (
-            """Vous êtes un correcteur orthographique spécialisé en imagerie médicale et gestion de rendez-vous.  
+        actes = self.fetch_examens()
+        custom_prompt_template = 
+             f"Voici la liste des examens médicaux proposés par notre centre d'imagerie médicale : {', '.join(actes.values())}. \n"
+             f"""Vous êtes un correcteur orthographique spécialisé en imagerie médicale et gestion de rendez-vous.  
 • En vous basant sur la phrase du patient, corrigez les erreurs issues de la mauvaise transcription vocale (speech-to-text), telles que les confusions phonétiques ou les homophones mal interprétés.  
 • Restez strictement dans le domaine de l’imagerie médicale (radiographie, scanner, angioscanner, coroscanner, IRM, échographie, mammographie, etc.) et de la prise de rendez-vous.  
 Vous devez répondre **uniquement** par la phrase corrigée, **sans** ajouter d’explication ni de commentaire.
