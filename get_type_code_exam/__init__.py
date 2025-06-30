@@ -199,7 +199,7 @@ class ExamenFetcher:
                 
     def query_correction(self, text):
         actes = self.fetch_examens()
-        custom_prompt_template = 
+        custom_prompt_template = (
              f"Voici la liste des examens médicaux proposés par notre centre d'imagerie médicale : {', '.join(actes.values())}. \n"
              f"""Vous êtes un correcteur orthographique spécialisé en imagerie médicale et gestion de rendez-vous.  
 • En vous basant sur la phrase du patient, corrigez les erreurs issues de la mauvaise transcription vocale (speech-to-text), telles que les confusions phonétiques ou les homophones mal interprétés.  
