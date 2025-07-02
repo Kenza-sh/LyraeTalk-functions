@@ -18,7 +18,7 @@ class ExamenFetcher:
         self.url = "https://sandbox.xplore.fr:20443/XaPriseRvGateway/Application/api/External/GetListeExamensFromTypeExamen"
         self.headers = {'Content-Type': 'application/json'}
         self.ids_base = {'CT', 'US', 'MR', 'MG', 'RX'}
-        self.llm_model = "gpt-35-turbo"
+        self.llm_model = "gpt-4o-mini" #"gpt-35-turbo"
         self.replacements = {
                 r'acromioclaviculaire': "ACROMIOCLAVICULAIRE (RADIOGRAPHIE DE L'ARTICULATION ACROMIO-CLAVICULAIRE)",
                 r'pangonogramme': "PANGONOGRAMME (RADIOGRAPHIE DES DENTS)",
