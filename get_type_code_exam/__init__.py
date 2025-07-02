@@ -231,7 +231,7 @@ Vous devez répondre **uniquement** par la phrase corrigée, **sans** ajouter d�
           "MAMMOGRAPHIE": "MG",
           'AUTRE' :None
       }
-      texte = self.query_correction(texte)
+      #texte = self.query_correction(texte)
       texte=self.process_text(texte)
       type_exam = self.get_type_examen(texte)
       id = exam_types.get(type_exam)
