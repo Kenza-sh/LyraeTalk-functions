@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 import requests
 import json
+import azure.functions as func
 
 client = AzureOpenAI(
             azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
