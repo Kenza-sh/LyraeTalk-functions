@@ -63,7 +63,7 @@ Retourne une **liste des créneaux adaptés**, sans aucun commentaire supplémen
 Si aucun créneau ne correspond à la demande, retourne simplement : 'None'
 """
         try:
-            completion = self.client.chat.completions.create(
+            completion = client.chat.completions.create(
                 model="gpt-4o-mini",
                 temperature=0.8,
                 max_tokens=2048,
