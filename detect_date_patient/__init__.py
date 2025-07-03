@@ -76,7 +76,7 @@ Si aucun créneau ne correspond à la demande, retourne simplement : 'None'
             if "none" in result.lower():
                return None
             logging.info(f"Réponse de l'IA : {result}")
-            return json.loads(result)
+            return result
         except Exception as e:
             logging.error(f"Erreur lors de l'analyse de la demande : {e}")
             return None
