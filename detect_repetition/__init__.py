@@ -56,14 +56,15 @@ def is_repeat_request(text: str) -> bool:
   
 def classify_sentence(sentence):
     prompt = f"""
-Vous êtes un assistant dont la mission est de déterminer si une phrase utilisateur exprime une demande de répétition de ce qui a déjà été dit.
-Par exemple : « Pouvez-vous répéter ? », « Pardon, je n’ai pas bien entendu », « Vous avez dit quoi? ».
-Phrase à classifier : {sentence}
-Répondez uniquement par `True` ou `False`, sans ponctuation ni texte additionnel.
+Vous êtes un assistant dont la tâche est de déterminer si la phrase utilisateur exprime une demande explicite de répétition d'une information déjà communiquée.
+Exemples de phrases exprimant une telle demande : « Pouvez-vous répéter ? », « Pardon, je n’ai pas bien entendu », « Vous avez dit quoi ? ».
+Phrase à analyser : {sentence}
+Répondez uniquement par `True` si la phrase est une demande de répétition, sinon par `False`. Ne fournissez aucune autre ponctuation ni texte supplémentaire.
 """
+
     response = client.chat.completions.create(
-        model="gpt-35-turbo",
-        temperature=0.3,
+        model= "gpt-4o-mini"
+        temperature=0,
         messages=[
             {"role": "user", "content": prompt}
         ]
