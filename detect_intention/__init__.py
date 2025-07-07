@@ -9,7 +9,7 @@ client = AzureOpenAI(
           api_key= os.environ["AZURE_OPENAI_API_KEY"],
           api_version="2024-05-01-preview"
         )
-llm_model="gpt-35-turbo"
+llm_model="gpt-4o-mini"
 
 categories = [
     "renseignements",
@@ -23,6 +23,19 @@ categories = [
 def answer_query(text):
         custom_prompt_template = (f"""Vous êtes un assistant pour un centre de radiologie.
 Voici la liste des catégories possibles : {', '.join(categories)}.
+
+1. **renseignements** : demande d'information générale ou spécifique sur les examens (ex : tarifs, préparation, durée, modalités, type d’appareil, indications médicales, documents à apporter, etc.).
+
+2. **prise de rendez-vous** : demande explicite pour **obtenir un rendez-vous** pour un ou plusieurs examens d’imagerie.
+
+3. **modification de rendez-vous** : demande de **changement de date, d’heure ou de type d’examen** pour un rendez-vous déjà existant.
+
+4. **annulation de rendez-vous** : demande d’**annuler un rendez-vous** programmé, sans souhait immédiat de le reprogrammer.
+
+5. **consultation de rendez-vous** : demande d’**obtenir les détails d’un rendez-vous existant** (date, heure, lieu, type d’examen, nom du praticien, etc.).
+
+6. **Autre** : tout message **hors sujet radiologique** ou sans lien clair avec la gestion des rendez-vous .
+
 Votre tâche :
 - Analysez la phrase suivante : "{text}"
 - Classez-la dans la catégorie la plus appropriée de la liste.
@@ -36,7 +49,7 @@ Votre tâche :
                         {"role": "system", "content": custom_prompt_template},
                         {"role": "user", "content": text}
                     ],
-                    temperature =0.3,
+                    temperature =0,
                      max_tokens=10
                 )
                 return completion.choices[0].message.content
