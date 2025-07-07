@@ -67,11 +67,12 @@ def is_urgence(type_exam_id: str, phrase: str) -> bool:
     default_patterns = [
         r"\burgences?\b",
         r"\burgemment\b",
-        r"\burgent(?:es?)?\b",
+        r"\burgent(?:e|s|es)?\b",
+
     ]
 
     # Sélection des bons patterns
-    patterns = patterns_by_exam.get(type_exam_id.upper(), default_patterns)
+    patterns = patterns_by_exam.get(type_exam_id.upper(), []) + default_patterns
 
     # Compilation et recherche
     master_pattern = re.compile("|".join(patterns), re.IGNORECASE)
