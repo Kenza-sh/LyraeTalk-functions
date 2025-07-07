@@ -11,7 +11,7 @@ client = AzureOpenAI(
           api_key= os.environ["AZURE_OPENAI_API_KEY"],
           api_version="2024-05-01-preview"
         )
-llm_model="gpt-35-turbo"
+llm_model="gpt-4o-mini"
 repeat_keywords = [
     r"je ne comprends pas (du tout|très bien|clairement)",
     r"rien (capté|pigé|compris|entendu|saisi|suivi|zappé)[?!]?",  # Très familier
@@ -63,7 +63,7 @@ Répondez uniquement par `True` si la phrase est une demande de répétition, si
 """
 
     response = client.chat.completions.create(
-        model= "gpt-4o-mini"
+        model= "gpt-4o-mini" ,
         temperature=0,
         messages=[
             {"role": "user", "content": prompt}
