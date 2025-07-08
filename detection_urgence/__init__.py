@@ -95,7 +95,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         result = is_urgence(type_exam_id  ,query)
-
+        result = "True" if result else "False"
         return func.HttpResponse(
             json.dumps({"response": result}),
             mimetype="application/json"
