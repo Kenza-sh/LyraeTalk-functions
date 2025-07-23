@@ -46,6 +46,7 @@ human_assistant_keywords = [
     r"\b(acceder|avoir accès|être mis en relation|obtenir un contact).*?\b(à|au)\s+(secrétariat|à une secrétaire|à une assistante|à un collaborateur)\b",
     r"\b(est-ce que|est-il possible|puis-je|serait-il possible).*?\b(parler|joindre|échanger).*?\b(avec|à)\s+(une|un)\s+(secrétaire|assistante|collaborateur|collaboratrice)\b",
     r"\b(parler|joindre|échanger).*?\b(une|un)\s+(personne|humain|interlocuteur|agent)\b.*?\b(pas un robot|vraie personne|en direct)\b"
+    r"\b(avoir la secrétaire)\b"
 ]
 patterns = [re.compile(p, re.IGNORECASE) for p in human_assistant_keywords]
 def is_human_assistant_request(text: str) -> bool:
@@ -62,6 +63,7 @@ Exemples de requêtes pertinentes (doivent retourner True) :
 - « Est-il possible d'avoir un assistant en direct ? »
 - "Je ne veux pas parler à un robot."
 - "Puis-je joindre quelqu’un en direct ?"
+- "Avoir la secrétaire"
 
 Exemples de requêtes non pertinentes (doivent retourner False) :
 - "Quelle est l'heure d'ouverture ?"
