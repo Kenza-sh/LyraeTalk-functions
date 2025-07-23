@@ -127,23 +127,32 @@ class ExamenFetcher:
     def get_type_examen(self, texte):
                 if not texte or not texte.strip():
                     logging.warning("Texte vide ou invalide fourni à get_type_examen")
-                    return "AUTRE"
+                    return "AUTRE", False
+
                 texte = texte.lower()
                 texte = texte.replace("’", "'")  # Apostrophe typographique
                 texte = unicodedata.normalize("NFKD", texte)  # Supprime accents
                 texte = ''.join(c for c in texte if not unicodedata.combining(c))
                 mots = re.findall(r"\b\w+\b", texte)
+                categories_trouvees = []
                 for category, words in self.keywords.items():
                     cleaned_words = [
                         ''.join(c for c in unicodedata.normalize("NFKD", w.lower()) if not unicodedata.combining(c))
                         for w in words
                     ]
                     if any(word in mots for word in cleaned_words):
-                        logging.info(f"Type d'examen identifié: {category}")
-                        return category
+                        categories_trouvees.append(category)
             
-                logging.info("Aucun type d'examen trouvé, retour par défaut: AUTRE")
-                return "AUTRE"
+                if not categories_trouvees:
+                    logging.info("Aucun type d'examen trouvé, retour par défaut: AUTRE")
+                    return "AUTRE", False
+            
+                if len(categories_trouvees) > 1:
+                    logging.info(f"Plusieurs types d'examen identifiés: {categories_trouvees}")
+                    return categories_trouvees[0], True  # On retourne la première comme principale
+            
+                logging.info(f"Type d'examen identifié: {categories_trouvees[0]}")
+                return categories_trouvees[0], False
 
                 
     def fetch_examens(self, ids=None):
@@ -233,7 +242,7 @@ Vous devez répondre **uniquement** par la phrase corrigée, **sans** ajouter d�
       }
       #texte = self.query_correction(texte)
       texte=self.process_text(texte)
-      type_exam = self.get_type_examen(texte)
+      type_exam , multiple_exam = self.get_type_examen(texte)
       id = exam_types.get(type_exam)
       if not id:
           logging.warning("Aucun ID correspondant trouvé")
@@ -250,7 +259,7 @@ Vous devez répondre **uniquement** par la phrase corrigée, **sans** ajouter d�
                   code_exam ="Mammographie Bilatérale"
                   code_exam_id = "N01MGBIL"
       logging.info(f"Résultat final: Type {type_exam}, ID {id}, Code Examen {code_exam}, Exam Code {code_exam_id}")
-      return type_exam,id, code_exam , code_exam_id
+      return type_exam,id, code_exam , code_exam_id , multiple_exam
 
 
 fetcher = ExamenFetcher()
@@ -268,9 +277,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 mimetype="application/json",
                 status_code=400
             )
-        type_examen ,type_examen_id, code_examen , code_examen_id = fetcher.lyae_talk_exam(query)
+        type_examen ,type_examen_id, code_examen , code_examen_id , multiple_exam= fetcher.lyae_talk_exam(query)
         return func.HttpResponse(
-            json.dumps({"type_examen": type_examen , "type_examen_id":type_examen_id , "code_examen":code_examen , "code_examen_id": code_examen_id}),
+            json.dumps({"type_examen": type_examen , "type_examen_id":type_examen_id , "code_examen":code_examen , "code_examen_id": code_examen_id , "multiple_exam": multiple_exam}),
             mimetype="application/json"
         )
 
