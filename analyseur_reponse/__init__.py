@@ -107,11 +107,16 @@ class AnalyseurConversation:
         return self.phrase_to_category.get(match.group(1), False) if match else False
 
     def get_class(self, text):
-        prompt_template = (
-            "Classifiez cette réponse comme 'positive', 'négative' ou 'indéterminée'. "
-            "Répondez uniquement par un seul mot en minuscules.\n"
-            f"Réponse: {text}"
-        )
+        prompt_template = """
+Classifiez cette réponse comme 'positive', 'négative' ou 'indéterminée'.
+Considérez une réponse comme :
+- 'positive' uniquement si elle contient une confirmation claire (ex. : 'oui', 'je confirme', 'c'est bon').
+- 'négative' uniquement si elle exprime un refus ou un désaccord explicite (ex. : 'non', 'je ne veux pas', 'je refuse').
+- 'indéterminée' dans tous les autres cas (ex. : préférences, suggestions, hésitations, ou toute réponse ambiguë).
+Répondez uniquement par un seul mot en minuscules.
+Réponse : {text}
+"""
+
 
         try:
             completion = client.chat.completions.create(
@@ -125,6 +130,7 @@ class AnalyseurConversation:
             )
             
             result = completion.choices[0].message.content.strip().lower()
+            logging.info(f"la réponse du modèle est : {result} ")
             if result in {'positive', 'négative', 'indéterminée'}:
                 return result
             return 'indéterminée'
