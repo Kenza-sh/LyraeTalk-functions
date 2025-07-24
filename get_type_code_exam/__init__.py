@@ -19,6 +19,40 @@ class ExamenFetcher:
         self.headers = {'Content-Type': 'application/json'}
         self.ids_base = {'CT', 'US', 'MR', 'MG', 'RX'}
         self.llm_model = "gpt-4o-mini" #"gpt-35-turbo"
+        self.radio_interv = [
+                r'\bm[íi]cro[- ]?biopsie(s)?\b',
+                r'\bbiopsie(s)?\b',
+                r'\bdrainage(s)?\b',
+                r'\binfiltration(s)?\b',
+                r'\bpose(s)?[- ]?de[- ]?cath[éeèe]ter(s)?\b',
+                r'\bembolisation(s)?\b',
+                r'\bangioplastie(s)?\b',
+                r'\bradio[- ]?fr[éeèe]quence(s)?\b',
+                r'\bablation(s)?\b',
+                r'\bmicro[- ]?ondes\b',
+                r'\bcimentoplastie(s)?\b',
+                r'\bfiltre(s)?[- ]?cave(s)?\b',
+                r'\bthrombectomie(s)?\b',
+                r'\bthrombolyse(s)?\b',
+                r'\bponction(s)?\b',
+                r'\bcyto[- ]?ponction(s)?\b',
+                r'\btips\b',
+                r'\bgastrostomie(s)?\b',
+                r'\bnéphrostomie(s)?\b',
+                r'\bcholangiographie(s)?\b',
+                r'\bangiographie(s)?\b',
+                r'\bfistulographie(s)?\b',
+                r'\bdilatation(s)?\b',
+                r'\bpose(s)?[- ]?de\b',
+                r'\bscl[éeèe]ro[- ]?th[éeèe]rapie(s)?\b',
+                r'\bmise(s)?[- ]?en[- ]?place[- ]?de\b',
+                r'\breconstruction(s)?\b',
+                r'\bcryo[- ]?ablation(s)?\b',
+                r'\banesth[éeèe]sie(s)?\b',
+                r'\bproc[éeèe]dure(s)?\b',
+                r'\basepsie(s)?\b',
+                r'\bconsentement(s)?\b',]
+        self.patterns_ardio_interv =[re.compile(p, re.IGNORECASE) for p in self.radio_interv ]
         self.replacements = {
                 r'acromioclaviculaire': "ACROMIOCLAVICULAIRE (RADIOGRAPHIE DE L'ARTICULATION ACROMIO-CLAVICULAIRE)",
                 r'pangonogramme': "PANGONOGRAMME (RADIOGRAPHIE DES DENTS)",
@@ -127,10 +161,11 @@ class ExamenFetcher:
     def get_type_examen(self, texte):
                 if not texte or not texte.strip():
                     logging.warning("Texte vide ou invalide fourni à get_type_examen")
-                    return "AUTRE", False
+                    return "AUTRE", False , False
 
                 texte = texte.lower()
                 texte = texte.replace("’", "'")  # Apostrophe typographique
+                is_radio_interv = any(p.search(texte) for p in  self.patterns_ardio_interv)
                 texte = unicodedata.normalize("NFKD", texte)  # Supprime accents
                 texte = ''.join(c for c in texte if not unicodedata.combining(c))
                 mots = re.findall(r"\b\w+\b", texte)
@@ -145,14 +180,14 @@ class ExamenFetcher:
             
                 if not categories_trouvees:
                     logging.info("Aucun type d'examen trouvé, retour par défaut: AUTRE")
-                    return "AUTRE", False
+                    return "AUTRE", False , is_radio_interv
             
                 if len(categories_trouvees) > 1:
                     logging.info(f"Plusieurs types d'examen identifiés: {categories_trouvees}")
-                    return categories_trouvees[0], True  # On retourne la première comme principale
+                    return categories_trouvees[0], True , is_radio_interv  # On retourne la première comme principale
             
                 logging.info(f"Type d'examen identifié: {categories_trouvees[0]}")
-                return categories_trouvees[0], False
+                return categories_trouvees[0], False , is_radio_interv
 
                 
     def fetch_examens(self, ids=None):
@@ -242,11 +277,11 @@ Vous devez répondre **uniquement** par la phrase corrigée, **sans** ajouter d�
       }
       #texte = self.query_correction(texte)
       texte=self.process_text(texte)
-      type_exam , multiple_exam = self.get_type_examen(texte)
+      type_exam , multiple_exam , is_radio_interv = self.get_type_examen(texte)
       id = exam_types.get(type_exam)
       if not id:
           logging.warning("Aucun ID correspondant trouvé")
-          return None, None , None , None
+          return None, None , None , None , None
       
       actes = self.fetch_examens([id])
       code_exam = self.get_class(texte, actes)
@@ -259,7 +294,7 @@ Vous devez répondre **uniquement** par la phrase corrigée, **sans** ajouter d�
                   code_exam ="Mammographie Bilatérale"
                   code_exam_id = "N01MGBIL"
       logging.info(f"Résultat final: Type {type_exam}, ID {id}, Code Examen {code_exam}, Exam Code {code_exam_id}")
-      return type_exam,id, code_exam , code_exam_id , multiple_exam
+      return type_exam,id, code_exam , code_exam_id , multiple_exam , is_radio_interv
 
 
 fetcher = ExamenFetcher()
@@ -277,9 +312,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 mimetype="application/json",
                 status_code=400
             )
-        type_examen ,type_examen_id, code_examen , code_examen_id , multiple_exam= fetcher.lyae_talk_exam(query)
+        type_examen ,type_examen_id, code_examen , code_examen_id , multiple_exam , is_radio_interv = fetcher.lyae_talk_exam(query)
         return func.HttpResponse(
-            json.dumps({"type_examen": type_examen , "type_examen_id":type_examen_id , "code_examen":code_examen , "code_examen_id": code_examen_id , "multiple_exam": multiple_exam}),
+            json.dumps({"type_examen": type_examen , "type_examen_id":type_examen_id , "code_examen":code_examen , "code_examen_id": code_examen_id , "multiple_exam": multiple_exam , "radio_interventionnelle" : is_radio_interv}),
             mimetype="application/json"
         )
 
