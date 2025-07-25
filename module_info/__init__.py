@@ -144,7 +144,7 @@ class RAG_Azure:
                     f"Pour vous aider, voici des informations de contexte:\n {context}\n\n"
                     f"Question du patient : {query} \n\n"
                     f"Si la question sort du domaine de l’imagerie médicale, répondez :« Je suis une assistante spécialisée en imagerie médicale et je ne peux répondre qu'aux questions relatives à ce domaine.»"
-                    f"Répondez uniquement à la question posée, utilisez un langage clair, simple et accessible, comme si vous parliez directement à la personne.\n"
+                    f"Répondez uniquement à la question posée, utilisez un langage clair, simple et accessible, comme si vous parliez directement à la personne. Eviter de saluer et rester neutre .\n"
                     f"Utilisez le vouvoiement. Soyez concis et précis dans la réponse.\n"       
                 )
         try:
