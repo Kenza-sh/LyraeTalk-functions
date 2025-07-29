@@ -116,7 +116,7 @@ class ExamenFetcher:
             "SCANNER": ["scanner", "tdm", "tomodensitométrie", "scan","angioscanner","angio-scanner","anteroscanner" ,"enteroscanner"],
             "IRM": ["irm", "imagerie par résonance magnétique",'rmn','mri',"uro-irm","uroirm"],
             "ECHOGRAPHIE": ["echo", "écho", "échographie","échographique","echographique","echographie", "échotomographie",'eco','éco'],
-            "MAMMOGRAPHIE": ["mammographie","mammographique", "mammogramme", "mammo", "mamographie","mamo", "sein", "mammaire"],
+            "MAMMOGRAPHIE": ["mammographie","mammographique", "mammogramme", "mammo", "mamographie","mamo", "sein", "seins", "mammaire" , "dépistage" ,"depistage"],
             'IMAGERIE':['imagerie']
         }
     def process_text(self , texte):
@@ -293,6 +293,9 @@ Vous devez répondre **uniquement** par la phrase corrigée, **sans** ajouter d�
       if id=="MG" and code_exam_id is None :
                   code_exam ="Mammographie Bilatérale"
                   code_exam_id = "N01MGBIL"
+      if not id and code_exam:
+              type_exam , multiple_exam , is_radio_interv = self.get_type_examen(code_exam)
+              id = exam_types.get(type_exam)
       logging.info(f"Résultat final: Type {type_exam}, ID {id}, Code Examen {code_exam}, Exam Code {code_exam_id}")
       return type_exam,id, code_exam , code_exam_id , multiple_exam , is_radio_interv
 
