@@ -273,17 +273,13 @@ Vous devez répondre **uniquement** par la phrase corrigée, **sans** ajouter d�
           "IRM": "MR",
           "ECHOGRAPHIE": "US",
           "MAMMOGRAPHIE": "MG",
-          'AUTRE' :None
+          'AUTRE' : None
       }
       #texte = self.query_correction(texte)
       texte=self.process_text(texte)
       type_exam , multiple_exam , is_radio_interv = self.get_type_examen(texte)
-      id = exam_types.get(type_exam)
-      if not id:
-          logging.warning("Aucun ID correspondant trouvé")
-          return None, None , None , None , None
-      
-      actes = self.fetch_examens([id])
+      id = exam_types.get(type_exam)      
+      actes = self.fetch_examens([id]) if id else self.fetch_examens()
       code_exam = self.get_class(texte, actes)
       code_exam_id = next((k for k, v in actes.items() if self.equiv(v, code_exam )), None)
       if code_exam=='None':
