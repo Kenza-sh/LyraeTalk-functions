@@ -157,38 +157,48 @@ class ExamenFetcher:
                 for pat, repl in patterns.items():
                     normalized = re.sub(pat, repl, normalized, flags=re.IGNORECASE)
                 return normalized
-                
+
     def get_type_examen(self, texte):
-                if not texte or not texte.strip():
-                    logging.warning("Texte vide ou invalide fourni à get_type_examen")
-                    return "AUTRE", False , False
+        if not texte or not texte.strip():
+            logging.warning("Texte vide ou invalide fourni à get_type_examen")
+            return "AUTRE", False, False
 
-                texte = texte.lower()
-                texte = texte.replace("’", "'")  # Apostrophe typographique
-                is_radio_interv = any(p.search(texte) for p in  self.patterns_ardio_interv)
-                texte = unicodedata.normalize("NFKD", texte)  # Supprime accents
-                texte = ''.join(c for c in texte if not unicodedata.combining(c))
-                mots = re.findall(r"\b\w+\b", texte)
-                categories_trouvees = []
-                for category, words in self.keywords.items():
-                    cleaned_words = [
-                        ''.join(c for c in unicodedata.normalize("NFKD", w.lower()) if not unicodedata.combining(c))
-                        for w in words
-                    ]
-                    if any(word in mots for word in cleaned_words):
-                        categories_trouvees.append(category)
-            
-                if not categories_trouvees:
-                    logging.info("Aucun type d'examen trouvé, retour par défaut: AUTRE")
-                    return "AUTRE", False , is_radio_interv
-            
-                if len(categories_trouvees) > 1:
-                    logging.info(f"Plusieurs types d'examen identifiés: {categories_trouvees}")
-                    return categories_trouvees[0], True , is_radio_interv  # On retourne la première comme principale
-            
-                logging.info(f"Type d'examen identifié: {categories_trouvees[0]}")
-                return categories_trouvees[0], False , is_radio_interv
+        # Normalisation de base
+        txt = texte.lower().replace("’", "'")
+        is_radio_interv = any(p.search(txt) for p in self.patterns_ardio_interv)
 
+        # Suppression des accents et tokenisation
+        normalized = unicodedata.normalize("NFKD", txt)
+        cleaned_txt = ''.join(c for c in normalized if not unicodedata.combining(c))
+        mots = re.findall(r"\b\w+\b", cleaned_txt)
+
+        # Comptage des occurrences par catégorie
+        category_scores = {}
+        for category, words in self.keywords.items():
+            # Nettoyage et déduplication des mots-clés
+            cleaned_words = set(
+                ''.join(c for c in unicodedata.normalize("NFKD", w.lower()) if not unicodedata.combining(c))
+                for w in words
+            )
+            # Compter chaque mot-clé dans le texte
+            counts = {w: mots.count(w) for w in cleaned_words}
+            total_occurrences = sum(counts.values())
+            if total_occurrences > 0:
+                category_scores[category] = total_occurrences
+
+        # Aucun mot-clé détecté
+        if not category_scores:
+            logging.info("Aucun type d'examen trouvé, retour par défaut: AUTRE")
+            return "AUTRE", False, is_radio_interv
+
+        # Sélection de la catégorie principale (celle avec le plus d'occurrences)
+        top_category = max(category_scores.items(), key=lambda x: x[1])[0]
+        total_matches = sum(category_scores.values())
+
+        # Correspondance forte si au moins 2 examens détectés (mêmes ou différents types)
+        is_strong_match = total_matches >= 2
+
+        return top_category, is_strong_match, is_radio_interv
                 
     def fetch_examens(self, ids=None):
         if ids is None:
